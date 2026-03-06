@@ -1,11 +1,22 @@
-import "./App.css";
-import { Button } from "./components/ui/button";
+import { RouterProvider } from "react-router-dom";
+import { SWRConfig } from "swr";
+import { Toaster } from "@/components/ui/sonner";
+import { router } from "@/router";
+import { fetcher } from "@/api/fetcher";
 
 function App() {
   return (
-    <div className="flex justify-center items-center h-screen">
-      <Button>Default</Button>
-    </div>
+    <SWRConfig
+      value={{
+        fetcher,
+        revalidateOnFocus: false,
+        errorRetryCount: 2,
+        dedupingInterval: 5000,
+      }}
+    >
+      <RouterProvider router={router} />
+      <Toaster richColors position="top-right" />
+    </SWRConfig>
   );
 }
 
