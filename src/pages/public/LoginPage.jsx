@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, Navigate } from "react-router-dom";
+import { Link, Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useAuthStore } from "@/store/authStore";
 import { useFormik } from "formik";
@@ -15,29 +15,44 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Eye, EyeOff, Loader2, ArrowRight, Check } from "lucide-react";
+import {
+  Eye,
+  EyeOff,
+  Loader2,
+  ArrowRight,
+  Check,
+  AlertCircle,
+} from "lucide-react";
 import { BorderBeam } from "@/components/ui/border-beam";
 
 const loginValidationSchema = Yup.object().shape({
   email: Yup.string()
-    .email("Format d'email invalide.")
+    .matches(
+      /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+      "Format d'email invalide.",
+    )
     .required("L'adresse email est requise."),
-  password: Yup.string().required("Le mot de passe est requis."),
+  password: Yup.string()
+    .min(8, "8 caractères minimum")
+    .required("Le mot de passe est requis."),
 });
 
 export default function LoginPage() {
   const { login } = useAuth();
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const user = useAuthStore((s) => s.user);
+  const location = useLocation();
+  const from = location.state?.from || null;
 
   const [showPassword, setShowPassword] = useState(false);
 
-  /* Redirection si déjà connecté — respecte le rôle */
+  /* Redirection si déjà connecté — respecte le rôle ou from */
   if (isAuthenticated) {
     const to =
-      user?.role === "RECRUTEUR"
+      from ||
+      (user?.role === "RECRUTEUR"
         ? "/recruteur/dashboard"
-        : "/candidat/dashboard";
+        : "/candidat/dashboard");
     return <Navigate to={to} replace />;
   }
 
@@ -47,11 +62,12 @@ export default function LoginPage() {
       password: "",
     },
     validationSchema: loginValidationSchema,
-    onSubmit: async (values, { setSubmitting }) => {
+    onSubmit: async (values, { setSubmitting, setStatus }) => {
       try {
-        await login(values.email, values.password);
-      } catch {
+        await login(values.email, values.password, from);
+      } catch (error) {
         // API Error handled globally by useAuth hooks
+        setStatus(error.response?.data?.message || "Identifiants incorrects");
       } finally {
         setSubmitting(false);
       }
@@ -149,6 +165,15 @@ export default function LoginPage() {
                 onSubmit={formik.handleSubmit}
                 className="space-y-6 flex flex-col grow"
               >
+                {formik.status && (
+                  <div className="p-4 rounded-xl bg-rose-50 border border-rose-100 flex items-center gap-3 animate-in fade-in slide-in-from-top-2">
+                    <AlertCircle className="w-5 h-5 text-rose-500 shrink-0" />
+                    <p className="text-xs text-rose-600 leading-tight">
+                      {formik.status}
+                    </p>
+                  </div>
+                )}
+
                 {/* Email Field */}
                 <div className="space-y-2">
                   <Label
@@ -253,6 +278,12 @@ export default function LoginPage() {
           <BorderBeam duration={6} delay={3} size={400} borderWidth={2} />
         </Card>
       </div>
+      <p className="mt-8 text-center text-sm text-slate-400">
+        En vous connectant, vous acceptez nos{" "}
+        <Link to="#" className="text-primary hover:underline">
+          Conditions d'Utilisation
+        </Link>
+      </p>
     </div>
   );
 }

@@ -27,6 +27,7 @@ import { Badge } from "@/components/ui/badge";
 import api from "@/api/axios";
 import { AUTH } from "@/api/endpoints";
 import { Logo } from "@/components/shared/Logo";
+import { toast } from "sonner";
 
 export function Navbar() {
   const navigate = useNavigate();
@@ -44,7 +45,7 @@ export function Navbar() {
       // Logout même si l'API échoue
     } finally {
       clearAuth();
-      navigate("/login");
+      toast.success("Déconnexion réussie");
     }
   };
 
@@ -164,7 +165,7 @@ export function Navbar() {
             </Link>
 
             {/* Theme toggle */}
-            <button
+            {/* <button
               onClick={toggleTheme}
               className="hidden lg:flex ml-4 lg:mt-0 focus:outline-none items-center justify-center p-2"
             >
@@ -174,7 +175,7 @@ export function Navbar() {
                 <Sun className="h-5 w-5 hover:text-primary transition-colors" />
               )}
               <span className="sr-only">Thème</span>
-            </button>
+            </button> */}
 
             {/* ── Auth Desktop (Bell + Avatar) ── */}
             {isAuthenticated ? (

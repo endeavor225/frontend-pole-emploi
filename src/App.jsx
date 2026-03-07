@@ -9,9 +9,12 @@ function App() {
     <SWRConfig
       value={{
         fetcher,
-        revalidateOnFocus: false,
-        errorRetryCount: 2,
-        dedupingInterval: 5000,
+        revalidateOnFocus: true, // Recommandé pour la fraîcheur des données
+        revalidateOnReconnect: true, // Très utile pour les connexions mobiles instables
+        refreshInterval: 0, // Pas de polling automatique (on évite de surcharger le serveur)
+        errorRetryCount: 3, // Un peu plus de souplesse pour les erreurs réseau
+        dedupingInterval: 2000, // 2 secondes suffisent généralement pour éviter les requêtes en double
+        shouldRetryOnError: true,
       }}
     >
       <RouterProvider router={router} />

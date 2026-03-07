@@ -3,10 +3,14 @@ import { fetcher } from "@/api/fetcher";
 import api from "@/api/axios";
 import { FAVORIS } from "@/api/endpoints";
 
-export function useFavoris() {
-  const { data, error, isLoading, mutate } = useSWR(FAVORIS.BASE, fetcher, {
-    revalidateOnFocus: false,
-  });
+export function useFavoris(isAuthenticated = true) {
+  const { data, error, isLoading, mutate } = useSWR(
+    isAuthenticated ? FAVORIS.BASE : null,
+    fetcher,
+    {
+      revalidateOnFocus: false,
+    },
+  );
 
   return {
     favoris: data?.data ?? data ?? [],

@@ -10,14 +10,16 @@ export function useAuth() {
   const { setAuth, logout: clearAuth, user } = useAuthStore();
 
   const login = useCallback(
-    async (email, password) => {
+    async (email, password, redirectPath = null) => {
       try {
         const { data } = await api.post(AUTH.LOGIN, { email, password });
         setAuth(data.user, data.token.token, data.refreshToken.token);
         toast.success("Connexion réussie !");
 
-        // Redirection par rôle
-        if (data.user.role === "RECRUTEUR") {
+        // Redirection
+        if (redirectPath) {
+          navigate(redirectPath);
+        } else if (data.user.role === "RECRUTEUR") {
           navigate("/recruteur/dashboard");
         } else {
           navigate("/candidat/dashboard");
@@ -25,7 +27,7 @@ export function useAuth() {
         return data;
       } catch (error) {
         const message = error.response?.data?.message || "Erreur de connexion";
-        toast.error(message);
+        //toast.error(message);
         throw error;
       }
     },
@@ -74,13 +76,12 @@ export function useAuth() {
     try {
       await api.post(AUTH.LOGOUT);
     } catch {
-      // Logout même si l'API échoue
+      throw new Error("Erreur lors de la déconnexion");
     } finally {
       clearAuth();
-      navigate("/login");
       toast.success("Déconnexion réussie");
     }
-  }, [clearAuth, navigate]);
+  }, [clearAuth]);
 
   const forgotPassword = useCallback(async (email) => {
     try {

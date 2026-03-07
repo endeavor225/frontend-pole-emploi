@@ -35,6 +35,7 @@ import {
   ChevronRight,
   Phone,
   Globe,
+  Bookmark,
 } from "lucide-react";
 import { toast } from "sonner";
 import { ROLES, TYPE_OFFRE_COLORS } from "@/lib/constants";
@@ -133,10 +134,7 @@ export default function OffreDetailPage() {
   const offre = fetchedOffre ?? initialOffre;
 
   const { user, isAuthenticated } = useAuthStore();
-  const { favoris, mutate: mutateFavoris } = isAuthenticated
-    ? // eslint-disable-next-line react-hooks/rules-of-hooks
-      useFavoris()
-    : { favoris: [], mutate: () => {} };
+  const { favoris, mutate: mutateFavoris } = useFavoris(isAuthenticated);
 
   const [postulerLoading, setPostulerLoading] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -258,12 +256,14 @@ export default function OffreDetailPage() {
             {/* ── Hero card ── */}
             <Card className="bg-(--cream)/10 border-border">
               <CardContent className="p-6">
-                <div className="flex flex-col items-center sm:flex-row sm:items-center gap-4">
-                  <CompanyAvatar
-                    name={entreprise.nomEntreprise || "?"}
-                    logoPath={entreprise.logoPath}
-                    size={152}
-                  />
+                <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+                  <div className="mx-auto sm:mx-0 shrink-0">
+                    <CompanyAvatar
+                      name={entreprise.nomEntreprise || "?"}
+                      logoPath={entreprise.logoPath}
+                      size={152}
+                    />
+                  </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex flex-wrap items-center gap-2 mb-2">
                       {offre.typeOffre && (
@@ -463,7 +463,7 @@ export default function OffreDetailPage() {
                     className="w-full gap-2"
                     onClick={handleToggleFavori}
                   >
-                    <Heart
+                    <Bookmark
                       className={`w-4 h-4 ${isFavori ? "fill-destructive text-destructive" : ""}`}
                     />
                     {isFavori ? "Retirer des favoris" : "Ajouter aux favoris"}
@@ -485,7 +485,9 @@ export default function OffreDetailPage() {
                       Connectez-vous pour postuler ou ajouter aux favoris.
                     </p>
                     <Button asChild className="w-full">
-                      <Link to="/login">Se connecter</Link>
+                      <Link to="/login" state={{ from: location.pathname }}>
+                        Se connecter
+                      </Link>
                     </Button>
                   </div>
                 )}
