@@ -26,8 +26,9 @@ import {
 import { Badge } from "@/components/ui/badge";
 import api from "@/api/axios";
 import { AUTH } from "@/api/endpoints";
-import { Logo } from "@/components/shared/Logo";
+//import { Logo } from "@/components/shared/Logo";
 import { toast } from "sonner";
+import logoImg from "/logo.png";
 
 export function Navbar() {
   const navigate = useNavigate();
@@ -69,13 +70,17 @@ export function Navbar() {
       <header className="sticky top-0 z-50 w-full bg-(--cream) text-foreground">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between max-w-7xl px-8 mx-auto w-full">
           {/* Top section (Logo + Mobile controls) */}
-          <div className="flex items-center justify-between py-3 md:py-6 w-full md:w-auto">
+          <div className="flex items-center justify-between py-3 md:py-3 w-full md:w-auto">
             {/* Logo */}
             <Link
               to="/"
               className="text-lg relative z-50 font-bold tracking-widest rounded-lg focus:outline-none"
             >
-              <Logo />
+              <img
+                src={logoImg}
+                alt="PAJDEF Logo"
+                className="h-15 w-auto object-contain"
+              />
             </Link>
 
             {/* Mobile right: Bell + Avatar (si connecté) + Hamburger */}

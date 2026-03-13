@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Logo } from "@/components/shared/Logo";
+import logoImg from "/logo.png";
 
 export function Footer() {
   return (
@@ -9,7 +9,7 @@ export function Footer() {
           {/* About */}
           <div className="space-y-3">
             <div className="opacity-90 inline-block">
-              <Logo className="scale-75 -ml-4 origin-left" />
+              <img src={logoImg} alt="PAJDEF Logo" className="h-10 w-auto" />
             </div>
             <p className="text-sm">
               Plateforme de mise en relation entre candidats et recruteurs en
