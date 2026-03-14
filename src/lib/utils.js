@@ -16,3 +16,9 @@ export function timeAgo(date) {
     return null;
   }
 }
+
+/* Formatage d'URL pour liens externes */
+export const formatExternalUrl = (url) => {
+  if (!url) return "#";
+  return /^https?:\/\//i.test(url) ? url : `https://${url}`;
+};
