@@ -13,9 +13,14 @@ import { ROLES } from "@/lib/constants";
 
 // Public
 const HomePage = lazy(() => import("@/pages/public/HomePage"));
+const AboutPage = lazy(() => import("@/pages/public/AboutPage"));
 const NotFoundPage = lazy(() => import("@/pages/public/NotFoundPage"));
 const OffresPage = lazy(() => import("@/pages/public/OffresPage"));
 const OffreDetailPage = lazy(() => import("@/pages/public/OffreDetailPage"));
+const EntreprisesPage = lazy(() => import("@/pages/public/EntreprisesPage"));
+const EntrepriseDetailPage = lazy(
+  () => import("@/pages/public/EntrepriseDetailPage"),
+);
 const LoginPage = lazy(() => import("@/pages/public/LoginPage"));
 const RegisterCandidatPage = lazy(
   () => import("@/pages/public/RegisterCandidatPage"),
@@ -92,6 +97,14 @@ export const router = createBrowserRouter([
         ),
       },
       {
+        path: "/a-propos",
+        element: (
+          <Lazy>
+            <AboutPage />
+          </Lazy>
+        ),
+      },
+      {
         path: "/offres",
         element: (
           <Lazy>
@@ -104,6 +117,22 @@ export const router = createBrowserRouter([
         element: (
           <Lazy>
             <OffreDetailPage />
+          </Lazy>
+        ),
+      },
+      {
+        path: "/entreprises",
+        element: (
+          <Lazy>
+            <EntreprisesPage />
+          </Lazy>
+        ),
+      },
+      {
+        path: "/entreprises/:id",
+        element: (
+          <Lazy>
+            <EntrepriseDetailPage />
           </Lazy>
         ),
       },
