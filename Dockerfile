@@ -13,6 +13,10 @@ RUN yarn install --immutable
 # Code source
 COPY . .
 
+# Définir les variables d'environnement pour le build Vite
+ARG VITE_API_URL
+ENV VITE_API_URL=$VITE_API_URL
+
 # Build Vite
 RUN yarn build
 

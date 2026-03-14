@@ -6,9 +6,9 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        - VITE_API_URL=https://api-emploi.pajdef.com/api
     image: frontend-pole-emploi:latest
     restart: unless-stopped
     ports:
       - "4173:80" #127.0.0.1:4173:80
-    environment:
-      - VITE_API_URL=https://api-emploi.pajdef.com/api
