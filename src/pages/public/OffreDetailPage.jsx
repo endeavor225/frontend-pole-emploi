@@ -257,13 +257,26 @@ export default function OffreDetailPage() {
             <Card className="bg-(--cream)/10 border-border">
               <CardContent className="p-6">
                 <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-                  <div className="mx-auto sm:mx-0 shrink-0">
-                    <CompanyAvatar
-                      name={entreprise.nomEntreprise || "?"}
-                      logoPath={entreprise.logoPath}
-                      size={152}
-                    />
-                  </div>
+                  {offre.entreprise?.id ? (
+                    <Link
+                      to={`/entreprises/${offre.entreprise.id}`}
+                      className="shrink-0 hover:opacity-80 transition-opacity mx-auto sm:mx-0"
+                    >
+                      <CompanyAvatar
+                        name={entreprise.nomEntreprise || "?"}
+                        logoPath={entreprise.logoPath}
+                        size={152}
+                      />
+                    </Link>
+                  ) : (
+                    <div className="mx-auto sm:mx-0 shrink-0">
+                      <CompanyAvatar
+                        name={entreprise.nomEntreprise || "?"}
+                        logoPath={entreprise.logoPath}
+                        size={152}
+                      />
+                    </div>
+                  )}
                   <div className="flex-1 min-w-0">
                     <div className="flex flex-wrap items-center gap-2 mb-2">
                       {offre.typeOffre && (
@@ -282,7 +295,18 @@ export default function OffreDetailPage() {
                       {entreprise.nomEntreprise && (
                         <span className="flex items-center gap-1">
                           <Building2 className="w-3.5 h-3.5" />
-                          {entreprise.nomEntreprise}
+                          {offre.entreprise?.id ? (
+                            <Link
+                              to={`/entreprises/${offre.entreprise.id}`}
+                              className="font-medium text-muted-foreground hover:text-foreground hover:underline transition-colors"
+                            >
+                              {entreprise.nomEntreprise}
+                            </Link>
+                          ) : (
+                            <span className="font-medium text-muted-foreground">
+                              {entreprise.nomEntreprise}
+                            </span>
+                          )}
                         </span>
                       )}
                       {offre.localisation && (

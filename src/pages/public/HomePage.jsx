@@ -52,7 +52,7 @@ const staggerContainer = {
   visible: {
     opacity: 1,
     transition: {
-      staggerChildren: 0.1,
+      staggerChildren: 0.2,
     },
   },
 };
@@ -73,14 +73,17 @@ export default function HomePage() {
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true }}
-            variants={fadeInRight}
+            variants={staggerContainer}
             className="flex flex-col w-full lg:w-6/12 justify-center lg:pt-24 items-start text-center lg:text-left mb-5 md:mb-0"
           >
-            <h1 className="my-4 text-5xl font-bold leading-tight text-foreground">
+            <motion.h1 
+              variants={fadeInUp}
+              className="my-4 text-5xl font-bold leading-tight text-foreground"
+            >
               <span className="text-primary tracking-wide">L'insertion</span>{" "}
               des jeunes est désormais beaucoup plus{" "}
               <span className="text-secondary">simple.</span>
-            </h1>
+            </motion.h1>
             <motion.p
               variants={fadeInUp}
               className="leading-normal text-xl mb-8 text-[#696984]"

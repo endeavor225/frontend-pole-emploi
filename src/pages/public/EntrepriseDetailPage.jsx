@@ -1,0 +1,398 @@
+import { useState } from "react";
+import { useParams, Link, useNavigate } from "react-router-dom";
+import { useEntreprise } from "@/hooks/useEntreprises";
+import { useOffres } from "@/hooks/useOffres";
+import { useAuthStore } from "@/store/authStore";
+import { useFavoris, ajouterFavori, supprimerFavori } from "@/hooks/useFavoris";
+import { LoadingSpinner } from "@/components/shared/LoadingSpinner";
+import { EmptyState } from "@/components/shared/EmptyState";
+import { AppPagination } from "@/components/shared/Pagination";
+import JobCard from "@/components/features/JobCard";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Building2,
+  MapPin,
+  Globe,
+  Phone,
+  Briefcase,
+  ArrowLeft,
+  Tag,
+  Mail,
+  User,
+} from "lucide-react";
+import { toast } from "sonner";
+import { formatExternalUrl } from "@/lib/utils";
+
+/* ── URL base pour les assets statiques ── */
+const API_BASE = (
+  import.meta.env.VITE_API_URL || "http://localhost:3333/api"
+).replace(/\/api$/, "");
+
+/* ── Avatar de l'entreprise ── */
+function CompanyAvatar({ name = "", logoPath = null, size = 96 }) {
+  const [imgError, setImgError] = useState(false);
+  const logoUrl = logoPath && !imgError ? `${API_BASE}${logoPath}` : null;
+
+  const palettes = [
+    { bg: "#FEE2E2", fg: "#991B1B" },
+    { bg: "#D1FAE5", fg: "#065F46" },
+    { bg: "#DBEAFE", fg: "#1E40AF" },
+    { bg: "#FEF3C7", fg: "#92400E" },
+    { bg: "#EDE9FE", fg: "#5B21B6" },
+    { bg: "#CCFBF1", fg: "#134E4A" },
+    { bg: "#FFEDD5", fg: "#9A3412" },
+    { bg: "#FCE7F3", fg: "#9D174D" },
+  ];
+  const idx = (name?.charCodeAt(0) || 0) % palettes.length;
+  const { bg, fg } = palettes[idx];
+
+  if (logoUrl) {
+    return (
+      <div
+        className="shrink-0 rounded-2xl overflow-hidden border border-border bg-muted/30"
+        style={{ width: size, height: size }}
+      >
+        <img
+          src={logoUrl}
+          alt={name}
+          className="w-full h-full object-contain"
+          onError={() => setImgError(true)}
+        />
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className="flex items-center justify-center rounded-2xl shrink-0 font-bold text-2xl"
+      style={{ width: size, height: size, backgroundColor: bg, color: fg }}
+    >
+      <Building2 style={{ width: size * 0.45, height: size * 0.45 }} />
+    </div>
+  );
+}
+
+/* ── Ligne d'info ── */
+function InfoRow({ icon: Icon, label, value, href }) {
+  if (!value) return null;
+  const content = (
+    <div className="flex items-center gap-2">
+      <Icon className="w-4 h-4 text-primary shrink-0" />
+      <span className="text-sm text-foreground">{value}</span>
+    </div>
+  );
+  if (href) {
+    return (
+      <a
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="hover:text-primary transition-colors"
+        title={label}
+      >
+        {content}
+      </a>
+    );
+  }
+  return <div title={label}>{content}</div>;
+}
+
+/* ══════════════════════════════════════════
+   Composant principal
+══════════════════════════════════════════ */
+export default function EntrepriseDetailPage() {
+  const navigate = useNavigate();
+  const { id } = useParams();
+  const [page, setPage] = useState(1);
+
+  /* Données de l'entreprise */
+  const { entreprise, isLoading, isError } = useEntreprise(id);
+
+  /* Offres actives de l'entreprise */
+  const {
+    offres,
+    meta,
+    isLoading: offresLoading,
+  } = useOffres(id ? { entreprise_id: id, page, limit: 8 } : {});
+
+  const totalPages = meta?.lastPage ?? 1;
+
+  /* Favoris */
+  const { isAuthenticated } = useAuthStore();
+  const { favoris, mutate: mutateFavoris } = useFavoris(isAuthenticated);
+  const favorisOffreIds = new Set(favoris.map((f) => f.offreId || f.offre?.id));
+
+  const handleToggleFavori = async (offre) => {
+    if (!isAuthenticated) {
+      toast.info("Connectez-vous pour ajouter aux favoris");
+      return;
+    }
+    try {
+      const existing = favoris.find(
+        (f) => (f.offreId || f.offre?.id) === offre.id,
+      );
+      if (existing) {
+        await supprimerFavori(existing.id);
+        toast.success("Retiré des favoris");
+      } else {
+        await ajouterFavori(offre.id);
+        toast.success("Ajouté aux favoris");
+      }
+      mutateFavoris();
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Erreur");
+    }
+  };
+
+  /* ── Loading ── */
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <LoadingSpinner text="Chargement de l'entreprise…" />
+      </div>
+    );
+  }
+
+  /* ── Erreur / introuvable ── */
+  if (isError || !entreprise) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center gap-4 text-center px-4">
+        <Building2 className="w-16 h-16 text-muted-foreground opacity-40" />
+        <h1 className="text-2xl font-bold">Entreprise introuvable</h1>
+        <p className="text-muted-foreground">
+          Cette entreprise n'existe pas ou a été supprimée.
+        </p>
+        <Button asChild variant="outline">
+          <Link to="/offres">
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Retour aux offres
+          </Link>
+        </Button>
+      </div>
+    );
+  }
+
+  const nom = entreprise.nomEntreprise || "Entreprise";
+  const domaine = entreprise.domaine?.libelle ?? null;
+  const secteur = entreprise.secteurActivite?.libelle ?? null;
+
+  return (
+    <div className="min-h-screen bg-muted/10 pb-20 pt-8">
+      <div className="max-w-6xl mx-auto px-3 sm:px-6 ">
+        {/* BOUTON RETOUR */}
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => navigate(-1)}
+          className="gap-1.5 -ml-2 mb-6"
+        >
+          <ArrowLeft className="w-4 h-4" /> Retour
+        </Button>
+
+        {/* HEADER PROFIL SANS BANNIÈRE */}
+        <Card className="mb-8 border-border/50 shadow-sm rounded-2xl overflow-hidden bg-card">
+          <div className="p-6 md:p-10 flex flex-col md:flex-row gap-6 md:gap-8 items-start md:items-center">
+            {/* AVATAR */}
+            <div className="shrink-0">
+              <CompanyAvatar
+                name={nom}
+                logoPath={entreprise.logoPath}
+                size={120}
+              />
+            </div>
+
+            {/* TITRE ET BADGES */}
+            <div className="flex-1 space-y-4">
+              <h1 className="text-3xl md:text-4xl font-extrabold text-foreground tracking-tight">
+                {nom}
+              </h1>
+
+              <div className="flex flex-wrap items-center gap-2">
+                {domaine && (
+                  <Badge
+                    variant="secondary"
+                    className="px-3 py-1 font-medium bg-primary/10 text-primary border-0"
+                  >
+                    <Tag className="w-3.5 h-3.5 mr-1.5" />
+                    {domaine}
+                  </Badge>
+                )}
+                {secteur && (
+                  <Badge
+                    variant="outline"
+                    className="px-3 py-1 font-medium bg-muted text-muted-foreground border-border"
+                  >
+                    <Briefcase className="w-3.5 h-3.5 mr-1.5" />
+                    {secteur}
+                  </Badge>
+                )}
+              </div>
+            </div>
+
+            {/* BOUTON D'ACTION (Optionnel) */}
+            {entreprise.siteWeb && (
+              <div className="shrink-0 w-full md:w-auto mt-2 md:mt-0">
+                <Button
+                  asChild
+                  variant="outline"
+                  className="w-full md:w-auto rounded-xl"
+                >
+                  <a
+                    href={formatExternalUrl(entreprise.siteWeb)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <Globe className="w-4 h-4 mr-2" />
+                    Visiter le site
+                  </a>
+                </Button>
+              </div>
+            )}
+          </div>
+        </Card>
+
+        {/* ── GRILLE DE CONTENU (ABOUT + SIDEBAR) ── */}
+        <div className="lg:grid lg:grid-cols-12 lg:gap-8 items-start space-y-8 lg:space-y-0">
+          {/* COLONNE GAUCHE (Main Content) */}
+          <div className="lg:col-span-8 space-y-8">
+            {/* SECTION: À PROPOS */}
+            {entreprise.description && (
+              <Card className="border-border/50 shadow-sm overflow-hidden rounded-2xl py-0">
+                <div className="bg-muted/30 px-6 py-4 border-b border-border/40 flex items-center">
+                  <h2 className="text-xl font-bold flex items-center gap-2">
+                    <Building2 className="w-5 h-5 text-primary" />À propos
+                  </h2>
+                </div>
+                <CardContent className="p-4">
+                  <p className="text-base text-foreground/80 leading-relaxed whitespace-pre-wrap">
+                    {entreprise.description}
+                  </p>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* SECTION: OFFRES ACTIVES */}
+            <section>
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-bold flex items-center gap-2">
+                  <Briefcase className="w-6 h-6 text-primary" />
+                  Offres actives
+                  {meta?.total > 0 && (
+                    <Badge variant="secondary" className="ml-2 font-semibold">
+                      {meta.total}
+                    </Badge>
+                  )}
+                </h2>
+              </div>
+
+              {offresLoading ? (
+                <div className="space-y-4">
+                  {Array.from({ length: 3 }).map((_, i) => (
+                    <div
+                      key={i}
+                      className="h-32 rounded-2xl border border-border bg-muted/10 animate-pulse"
+                    />
+                  ))}
+                </div>
+              ) : offres.length === 0 ? (
+                <EmptyState
+                  icon={Briefcase}
+                  title="Aucune offre active"
+                  description="Cette entreprise n'a pas publié d'offres pour le moment."
+                />
+              ) : (
+                <>
+                  <div className="space-y-4">
+                    {offres.map((offre) => (
+                      <JobCard
+                        key={offre.id}
+                        offre={offre}
+                        isFavori={favorisOffreIds.has(offre.id)}
+                        onToggleFavori={handleToggleFavori}
+                      />
+                    ))}
+                  </div>
+                  <div className="mt-8">
+                    <AppPagination
+                      currentPage={page}
+                      totalPages={totalPages}
+                      onPageChange={(p) => setPage(p)}
+                    />
+                  </div>
+                </>
+              )}
+            </section>
+          </div>
+
+          {/* COLONNE DROITE (Sidebar Infos) */}
+          <div className="lg:col-span-4 space-y-6 sticky top-24">
+            <Card className="border-border/50 shadow-md rounded-2xl overflow-hidden py-0">
+              <div className="bg-primary px-6 py-4 text-primary-foreground">
+                <h3 className="font-semibold flex items-center gap-2">
+                  Contact & Infos
+                </h3>
+              </div>
+              <CardContent className="p-6 space-y-5">
+                {entreprise.user && (
+                  <InfoRow
+                    icon={User}
+                    label="Contact recruteur"
+                    value={[
+                      entreprise.civilite,
+                      entreprise.user.prenom,
+                      entreprise.user.nom,
+                    ]
+                      .filter(Boolean)
+                      .join(" ")}
+                  />
+                )}
+                {(entreprise.adresse ||
+                  entreprise.ville ||
+                  entreprise.pays) && (
+                  <InfoRow
+                    icon={MapPin}
+                    label="Localisation"
+                    value={[
+                      entreprise.adresse,
+                      entreprise.codePostal,
+                      entreprise.ville,
+                      entreprise.pays,
+                    ]
+                      .filter(Boolean)
+                      .join(", ")}
+                  />
+                )}
+                {entreprise.telephone && (
+                  <InfoRow
+                    icon={Phone}
+                    label="Téléphone"
+                    value={entreprise.telephone}
+                    href={`tel:${entreprise.telephone}`}
+                  />
+                )}
+                {entreprise.user?.email && (
+                  <InfoRow
+                    icon={Mail}
+                    label="Email"
+                    value={entreprise.user.email}
+                    href={`mailto:${entreprise.user.email}`}
+                  />
+                )}
+                {entreprise.siteWeb && (
+                  <InfoRow
+                    icon={Globe}
+                    label="Site web"
+                    value={entreprise.siteWeb.replace(/^https?:\/\//, "")}
+                    href={formatExternalUrl(entreprise.siteWeb)}
+                  />
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

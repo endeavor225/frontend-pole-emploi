@@ -125,7 +125,8 @@ export default function JobCard({ offre, isFavori, onToggleFavori }) {
     <Card className="group transition-all duration-200 hover:shadow-md hover:border-primary/30 bg-(--cream)/10">
       <CardContent className="p-5">
         <div className="flex flex-col items-center sm:flex-row sm:items-center gap-4">
-          {/* Logo */}
+          {/* Logo cliquable */}
+
           <CompanyAvatar name={nomEntreprise} logoPath={entreprise.logoPath} />
 
           {/* Body */}
@@ -138,7 +139,7 @@ export default function JobCard({ offre, isFavori, onToggleFavori }) {
                     {offre.titre}
                   </Link>
                 </h3>
-                <p className="text-sm text-muted-foreground mt-0.5 truncate">
+                <p className="text-sm text-muted-foreground mt-0.5 truncate block">
                   {nomEntreprise}
                 </p>
               </div>
