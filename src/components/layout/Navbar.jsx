@@ -139,7 +139,7 @@ export function Navbar() {
           >
             <Link
               to="/"
-              className="px-4 py-2 mt-2 md:mt-0 text-sm bg-transparent rounded-lg md:ml-2 focus:outline-none hover:text-foreground/70"
+              className="px-2 py-2 mt-2 md:mt-0 text-sm bg-transparent rounded-lg md:ml-2 focus:outline-none hover:text-foreground/70"
               onClick={() => setMobileMenuOpen(false)}
             >
               Accueil

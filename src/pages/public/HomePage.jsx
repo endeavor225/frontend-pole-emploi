@@ -76,7 +76,7 @@ export default function HomePage() {
             variants={staggerContainer}
             className="flex flex-col w-full lg:w-6/12 justify-center lg:pt-24 items-start text-center lg:text-left mb-5 md:mb-0"
           >
-            <motion.h1 
+            <motion.h1
               variants={fadeInUp}
               className="my-4 text-5xl font-bold leading-tight text-foreground"
             >
@@ -92,7 +92,7 @@ export default function HomePage() {
               talents ivoiriens avec les recruteurs de manière interactive.
             </motion.p>
             <motion.div
-              variants={fadeInUp}
+              variants={scaleIn}
               className="w-full md:flex items-center justify-center lg:justify-start md:space-x-5 gap-5"
             >
               <Link
@@ -237,7 +237,7 @@ export default function HomePage() {
           whileInView="visible"
           viewport={{ once: true }}
           variants={fadeInUp}
-          className="max-w-4xl mx-auto -mt-10 mb-32"
+          className="max-w-4xl mx-auto mt-10 mb-32"
         >
           <h1 className="text-center mb-10 text-[#696984] font-semibold text-xl tracking-tight">
             Plus de 5 000 entreprises nous font confiance
