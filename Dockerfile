@@ -8,11 +8,7 @@ RUN corepack enable
 
 # Dépendances
 COPY package.json yarn.lock ./
-# RUN yarn install --immutable
-
-# Pour Yarn v1 (Classic)
-RUN yarn install --frozen-lockfile
-
+RUN yarn install --immutable
 
 # Code source
 COPY . .
