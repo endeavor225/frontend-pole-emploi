@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
@@ -18,8 +18,11 @@ export function VerifyEmailForm() {
 
   const [status, setStatus] = useState("loading"); // loading | success | error
   const [message, setMessage] = useState("");
+  const effectRan = useRef(false);
 
   useEffect(() => {
+    if (effectRan.current === true) return;
+    
     if (!token) {
       setStatus("error");
       setMessage("Aucun token de vérification trouvé.");
@@ -39,7 +42,8 @@ export function VerifyEmailForm() {
         );
       }
     };
-
+    
+    effectRan.current = true;
     verify();
   }, [token, verifyEmail]);
 
