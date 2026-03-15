@@ -41,7 +41,6 @@ export function useAuth() {
           headers: { "Content-Type": "multipart/form-data" },
         });
         toast.success("Inscription réussie ! Vérifiez votre email.");
-        navigate("/login");
         return data;
       } catch (error) {
         const message =
