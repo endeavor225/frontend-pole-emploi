@@ -1,89 +1,55 @@
-import { useEffect, useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
-import { useAuth } from "@/hooks/useAuth";
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { CheckCircle2, XCircle, Loader2 } from "lucide-react";
+import { MailCheck } from "lucide-react";
+import { VerifyEmailForm } from "@/components/features/auth/VerifyEmailForm";
 
 export default function VerifyEmailPage() {
-  const { verifyEmail } = useAuth();
-  const [searchParams] = useSearchParams();
-  const token = searchParams.get("token") || "";
-
-  const [status, setStatus] = useState("loading"); // loading | success | error
-  const [message, setMessage] = useState("");
-
-  useEffect(() => {
-    if (!token) {
-      setStatus("error");
-      setMessage("Aucun token de vérification trouvé.");
-      return;
-    }
-
-    const verify = async () => {
-      try {
-        await verifyEmail(token);
-        setStatus("success");
-        setMessage("Votre adresse email a été vérifiée avec succès !");
-      } catch (error) {
-        setStatus("error");
-        setMessage(
-          error.response?.data?.message ||
-            "Le lien de vérification est invalide ou a expiré.",
-        );
-      }
-    };
-
-    verify();
-  }, [token, verifyEmail]);
-
   return (
-    <div className="flex min-h-[calc(100vh-10rem)] items-center justify-center px-4 py-12">
-      <Card className="w-full max-w-md text-center">
-        <CardHeader>
-          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full">
-            {status === "loading" && (
-              <div className="bg-primary/10 rounded-full h-full w-full flex items-center justify-center">
-                <Loader2 className="h-7 w-7 text-primary animate-spin" />
-              </div>
-            )}
-            {status === "success" && (
-              <div className="bg-chart-2/10 rounded-full h-full w-full flex items-center justify-center">
-                <CheckCircle2 className="h-7 w-7 text-chart-2" />
-              </div>
-            )}
-            {status === "error" && (
-              <div className="bg-destructive/10 rounded-full h-full w-full flex items-center justify-center">
-                <XCircle className="h-7 w-7 text-destructive" />
-              </div>
-            )}
+    <div className="flex min-h-[calc(100vh-5rem)] w-full items-center bg-slate-50/50 dark:bg-background">
+      <div className="container mx-auto grid w-full grid-cols-1 gap-12 px-4 py-12 lg:grid-cols-2 lg:gap-8 lg:px-8 xl:gap-24">
+        {/* Colonne Gauche : Branding */}
+        <div className="flex flex-col justify-center space-y-10 lg:py-12 order-2 lg:order-1">
+          <div className="flex items-center gap-3">
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary">
+              <MailCheck className="h-6 w-6 text-primary-foreground" />
+            </div>
+            <span className="text-2xl font-bold uppercase tracking-wider text-foreground">
+              TALENTS
+            </span>
           </div>
-          <CardTitle className="text-2xl">
-            {status === "loading" && "Vérification en cours…"}
-            {status === "success" && "Email vérifié !"}
-            {status === "error" && "Échec de la vérification"}
-          </CardTitle>
-          <CardDescription>{message}</CardDescription>
-        </CardHeader>
 
-        <CardFooter className="justify-center">
-          {status !== "loading" && (
-            <Button asChild>
-              <Link to="/login">
-                {status === "success"
-                  ? "Se connecter"
-                  : "Retour à la connexion"}
-              </Link>
-            </Button>
-          )}
-        </CardFooter>
-      </Card>
+          <div className="space-y-6">
+            <h1 className="text-4xl font-extrabold tracking-tight text-foreground sm:text-5xl md:text-6xl lg:leading-[1.1]">
+              Validation <br className="hidden lg:block xl:hidden" /> de contact.
+            </h1>
+            <p className="max-w-lg text-lg leading-relaxed text-muted-foreground sm:text-xl">
+              Nous vérifions votre adresse email. Cette étape est cruciale pour sécuriser votre compte et garantir que vous recevrez toutes vos opportunités.
+            </p>
+          </div>
+
+          <div className="grid max-w-sm grid-cols-2 gap-8 border-t border-border pt-8">
+            <div className="space-y-1">
+              <p className="text-3xl font-bold tracking-tight text-foreground">
+                10k+
+              </p>
+              <p className="text-xs font-bold tracking-wider text-muted-foreground uppercase">
+                Utilisateurs
+              </p>
+            </div>
+            <div className="space-y-1">
+              <p className="text-3xl font-bold tracking-tight text-foreground">
+                99.9%
+              </p>
+              <p className="text-xs font-bold tracking-wider text-muted-foreground uppercase">
+                Uptime
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Colonne Droite : Formulaire */}
+        <div className="flex items-center justify-center lg:justify-end order-1 lg:order-2">
+          <VerifyEmailForm />
+        </div>
+      </div>
     </div>
   );
 }
