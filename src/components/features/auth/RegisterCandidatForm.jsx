@@ -166,6 +166,7 @@ export function RegisterCandidatForm({ domaines, niveaux }) {
         });
         await registerCandidat(formData);
         setIsSuccess(true);
+        window.scrollTo({ top: 0, behavior: "smooth" });
       } catch {
         // Handled in useAuth
       } finally {
@@ -209,27 +210,30 @@ export function RegisterCandidatForm({ domaines, niveaux }) {
 
     if (!stepHasErrors) {
       setStep(step + 1);
+      window.scrollTo({ top: 0, behavior: "smooth" });
     }
   };
 
   return (
     <Card className="w-full max-w-[580px] border-0 bg-background/80 shadow-2xl shadow-primary/5 backdrop-blur-xl sm:rounded-3xl">
-      <CardHeader className="text-center pb-6 pt-8">
-        <CardTitle className="text-2xl font-extrabold text-foreground">
-          Inscription candidat
+      <CardHeader className="space-y-1 pb-6 pt-8 text-center">
+        <CardTitle className="text-3xl font-extrabold tracking-tight text-foreground">
+          Espace Candidat
         </CardTitle>
-        <CardDescription className="pt-2 font-medium">
-          Étape {step + 1} sur {STEPS.length} — {STEPS[step]}
+        <CardDescription className="text-base font-medium text-muted-foreground">
+          {isSuccess
+            ? "Compte créé avec succès"
+            : `Étape ${step + 1} sur ${STEPS.length} : ${STEPS[step]}`}
         </CardDescription>
-
-        {/* Stepper */}
-        <div className="flex items-center justify-center gap-2 pt-4">
+        <div className="flex justify-center gap-1.5 pt-4">
           {STEPS.map((_, i) => (
             <div
               key={i}
-              className={`h-2 flex-1 rounded-full transition-all duration-300 ${
-                i <= step ? "bg-primary" : "bg-muted"
-              }`}
+              className={cn(
+                "h-2 rounded-full transition-all duration-500",
+                step === i ? "w-16 bg-primary" : "w-2 bg-primary/20",
+                isSuccess && "bg-emerald-500",
+              )}
             />
           ))}
         </div>
@@ -270,9 +274,11 @@ export function RegisterCandidatForm({ domaines, niveaux }) {
             {/* Step 1: Informations personnelles */}
             {step === 0 && (
               <>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="prenom">Prénom *</Label>
+                    <Label htmlFor="prenom">
+                      Prénom <span className="text-destructive">*</span>
+                    </Label>
                     <Input
                       id="prenom"
                       {...formik.getFieldProps("prenom")}
@@ -291,7 +297,9 @@ export function RegisterCandidatForm({ domaines, niveaux }) {
                     )}
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="nom">Nom *</Label>
+                    <Label htmlFor="nom">
+                      Nom <span className="text-destructive">*</span>
+                    </Label>
                     <Input
                       id="nom"
                       {...formik.getFieldProps("nom")}
@@ -312,7 +320,9 @@ export function RegisterCandidatForm({ domaines, niveaux }) {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="email">Email *</Label>
+                  <Label htmlFor="email">
+                    Email <span className="text-destructive">*</span>
+                  </Label>
                   <Input
                     id="email"
                     type="email"
@@ -333,7 +343,9 @@ export function RegisterCandidatForm({ domaines, niveaux }) {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="telephone">Téléphone *</Label>
+                  <Label htmlFor="telephone">
+                    Téléphone <span className="text-destructive">*</span>
+                  </Label>
                   <PhoneInput
                     id="telephone"
                     name="telephone"
@@ -363,7 +375,9 @@ export function RegisterCandidatForm({ domaines, niveaux }) {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="password">Mot de passe *</Label>
+                  <Label htmlFor="password">
+                    Mot de passe <span className="text-destructive">*</span>
+                  </Label>
                   <div className="relative">
                     <Input
                       id="password"
@@ -401,7 +415,8 @@ export function RegisterCandidatForm({ domaines, niveaux }) {
 
                 <div className="space-y-2">
                   <Label htmlFor="password_confirmation">
-                    Confirmer le mot de passe *
+                    Confirmer le mot de passe{" "}
+                    <span className="text-destructive">*</span>
                   </Label>
                   <Input
                     id="password_confirmation"
@@ -429,9 +444,11 @@ export function RegisterCandidatForm({ domaines, niveaux }) {
             {/* Step 2: Profil professionnel */}
             {step === 1 && (
               <>
-                <div className="grid grid-cols-2 gap-4 mb-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-3">
                   <div className="space-y-2">
-                    <Label htmlFor="sexe">Sexe *</Label>
+                    <Label htmlFor="sexe">
+                      Sexe <span className="text-destructive">*</span>
+                    </Label>
                     <Select
                       value={formik.values.sexe}
                       onValueChange={(val) => formik.setFieldValue("sexe", val)}
@@ -463,7 +480,9 @@ export function RegisterCandidatForm({ domaines, niveaux }) {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="etatCivil">État civil *</Label>
+                    <Label htmlFor="etatCivil">
+                      État civil <span className="text-destructive">*</span>
+                    </Label>
                     <Select
                       value={formik.values.etatCivil}
                       onValueChange={(val) =>
@@ -498,7 +517,10 @@ export function RegisterCandidatForm({ domaines, niveaux }) {
                 </div>
 
                 <div className="space-y-2 flex flex-col">
-                  <Label htmlFor="dateNaissance">Date de naissance *</Label>
+                  <Label htmlFor="dateNaissance">
+                    Date de naissance{" "}
+                    <span className="text-destructive">*</span>
+                  </Label>
                   <Popover
                     open={datePopoverOpen}
                     onOpenChange={(open) => {
@@ -564,9 +586,11 @@ export function RegisterCandidatForm({ domaines, niveaux }) {
                     )}
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="ville">Ville *</Label>
+                    <Label htmlFor="ville">
+                      Ville <span className="text-destructive">*</span>
+                    </Label>
                     <Input
                       id="ville"
                       {...formik.getFieldProps("ville")}
@@ -585,7 +609,10 @@ export function RegisterCandidatForm({ domaines, niveaux }) {
                     )}
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="experience">Expérience (années) *</Label>
+                    <Label htmlFor="experience">
+                      Expérience (années){" "}
+                      <span className="text-destructive">*</span>
+                    </Label>
                     <Input
                       id="experience"
                       type="number"
@@ -607,7 +634,10 @@ export function RegisterCandidatForm({ domaines, niveaux }) {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="domaineId">Domaine d'activité *</Label>
+                  <Label htmlFor="domaineId">
+                    Domaine d'activité{" "}
+                    <span className="text-destructive">*</span>
+                  </Label>
                   <FormikCombobox
                     formik={formik}
                     name="domaineId"
@@ -620,7 +650,9 @@ export function RegisterCandidatForm({ domaines, niveaux }) {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="niveauEtudeId">Niveau d'étude *</Label>
+                  <Label htmlFor="niveauEtudeId">
+                    Niveau d'étude <span className="text-destructive">*</span>
+                  </Label>
                   <FormikCombobox
                     formik={formik}
                     name="niveauEtudeId"
@@ -793,7 +825,10 @@ export function RegisterCandidatForm({ domaines, niveaux }) {
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={() => setStep(step - 1)}
+                  onClick={() => {
+                    setStep(step - 1);
+                    window.scrollTo({ top: 0, behavior: "smooth" });
+                  }}
                   disabled={formik.isSubmitting}
                   className="flex-1 h-11 transition-all shadow-md hover:shadow-lg hover:-translate-y-0.5"
                 >
