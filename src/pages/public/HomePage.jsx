@@ -96,7 +96,7 @@ export default function HomePage() {
               className="w-full md:flex items-center justify-center lg:justify-start md:space-x-5 gap-5"
             >
               <Link
-                to="/register/candidat"
+                to="/register"
                 className="lg:mx-0 bg-primary text-white text-xl font-bold rounded-full py-4 px-9 focus:outline-none transform transition hover:scale-110 duration-300 ease-in-out shadow-xl shadow-primary/20 inline-block"
               >
                 Rejoindre gratuitement
