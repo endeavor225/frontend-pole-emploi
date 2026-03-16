@@ -184,7 +184,12 @@ export function LoginForm() {
 
             <p className="text-center text-sm text-muted-foreground mt-4">
               En vous connectant, vous acceptez nos{" "}
-              <Link to="#" className="text-primary hover:underline">
+              <Link
+                to="/cgu"
+                className="text-primary hover:underline"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 Conditions d'Utilisation
               </Link>
             </p>

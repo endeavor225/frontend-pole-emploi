@@ -39,6 +39,12 @@ export function Footer() {
               >
                 Inscription recruteur
               </Link>
+              <Link
+                to="/cgu"
+                className="text-sm hover:text-white transition-colors"
+              >
+                Conditions Générales d'Utilisation
+              </Link>
             </nav>
           </div>
 
