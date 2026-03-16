@@ -30,6 +30,7 @@ import {
   Globe,
 } from "lucide-react";
 import { motion } from "framer-motion";
+import CompanyMarquee from "@/components/features/CompanyMarquee";
 import girlImg from "@/assets/img/girl.png";
 
 const fadeInUp = {
@@ -230,36 +231,9 @@ export default function HomePage() {
       </section>
 
       {/* Main Content Area */}
-      <div className="container px-8 mx-auto max-w-7xl text-gray-700 overflow-x-hidden">
+      <div className="container px-4 mx-auto max-w-7xl text-gray-700 overflow-x-hidden">
         {/* Trusted By Section */}
-        <motion.div
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true }}
-          variants={fadeInUp}
-          className="max-w-4xl mx-auto mt-10 mb-32"
-        >
-          <h1 className="text-center mb-10 text-[#696984] font-semibold text-xl tracking-tight">
-            Plus de 5 000 entreprises nous font confiance
-          </h1>
-          <div className="flex flex-wrap justify-center items-center gap-12 lg:gap-20 opacity-40 grayscale hover:grayscale-0 transition-all duration-700">
-            <span className="text-3xl font-extrabold tracking-tighter">
-              google
-            </span>
-            <span className="text-3xl font-extrabold tracking-tighter">
-              netflix
-            </span>
-            <span className="text-3xl font-extrabold tracking-tighter">
-              airbnb
-            </span>
-            <span className="text-3xl font-extrabold tracking-tighter">
-              amazon
-            </span>
-            <span className="text-3xl font-extrabold tracking-tighter">
-              facebook
-            </span>
-          </div>
-        </motion.div>
+        <CompanyMarquee />
 
         {/* All-In-One Platform Section */}
         <motion.div
