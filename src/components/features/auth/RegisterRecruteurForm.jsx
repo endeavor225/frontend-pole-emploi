@@ -294,6 +294,7 @@ export function RegisterRecruteurForm({ domaines }) {
                       disabled={formik.isSubmitting}
                     >
                       <SelectTrigger
+                        size="lg"
                         className={`w-full h-10 border-border focus-visible:ring-primary focus-visible:ring-offset-2 transition-all duration-200 ${
                           formik.touched.civilite && formik.errors.civilite
                             ? "border-destructive focus-visible:ring-destructive"

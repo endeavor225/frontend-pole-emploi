@@ -459,7 +459,7 @@ export function RegisterCandidatForm({ domaines, niveaux }) {
                     >
                       <SelectTrigger
                         size="lg"
-                        className={`w-full border-border  focus-visible:ring-primary focus-visible:ring-offset-2 transition-all duration-200 ${
+                        className={`w-full h-10 border-border  focus-visible:ring-primary focus-visible:ring-offset-2 transition-all duration-200 ${
                           formik.touched.sexe && formik.errors.sexe
                             ? "border-destructive focus-visible:ring-destructive"
                             : ""
@@ -495,7 +495,7 @@ export function RegisterCandidatForm({ domaines, niveaux }) {
                     >
                       <SelectTrigger
                         size="lg"
-                        className={`w-full border-border focus-visible:ring-primary focus-visible:ring-offset-2 transition-all duration-200 ${
+                        className={`w-full h-10 border-border focus-visible:ring-primary focus-visible:ring-offset-2 transition-all duration-200 ${
                           formik.touched.etatCivil && formik.errors.etatCivil
                             ? "border-destructive focus-visible:ring-destructive"
                             : ""
