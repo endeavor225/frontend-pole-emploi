@@ -2,8 +2,6 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useFormik } from "formik";
 import * as Yup from "yup";
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
 import { isValidPhoneNumber } from "react-phone-number-input";
 import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
@@ -19,12 +17,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Calendar } from "@/components/ui/calendar";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 import { PhoneInput } from "@/components/reui/phone-input";
 import {
   Card,
@@ -44,17 +36,19 @@ import {
   Upload,
   ArrowLeft,
   ArrowRight,
-  CalendarIcon,
   CheckCircle2,
 } from "lucide-react";
 
 const STEPS = [
   "Informations personnelles",
-  "Profil professionnel",
-  "Documents",
+  "Informations entreprise",
+  "Logo & Finalisation",
 ];
 
-const candidatValidationSchema = Yup.object().shape({
+const recruteurValidationSchema = Yup.object().shape({
+  civilite: Yup.string()
+    .oneOf(["M", "Mme", "Mlle"], "Civilité invalide")
+    .required("Civilité obligatoire"),
   nom: Yup.string()
     .min(2, "Minimum 2 caractères")
     .max(80, "Maximum 80 caractères")
@@ -69,6 +63,11 @@ const candidatValidationSchema = Yup.object().shape({
       "Format d'email invalide.",
     )
     .required("Email obligatoire"),
+  telephone: Yup.string()
+    .required("Téléphone obligatoire")
+    .test("is-valid-phone", "Numéro de téléphone invalide", (value) =>
+      value ? isValidPhoneNumber(value) : false,
+    ),
   password: Yup.string()
     .min(8, "Minimum 8 caractères requis")
     .required("Mot de passe obligatoire"),
@@ -78,29 +77,41 @@ const candidatValidationSchema = Yup.object().shape({
       "Les mots de passe ne correspondent pas",
     )
     .required("Confirmation obligatoire"),
-  telephone: Yup.string()
-    .required("Téléphone obligatoire")
-    .test("is-valid-phone", "Numéro de téléphone invalide", (value) =>
-      value ? isValidPhoneNumber(value) : false,
-    ),
-  experience: Yup.number()
-    .min(0, "L'expérience ne peut être négative")
-    .required("Années d'expérience obligatoires"),
-  niveauEtudeId: Yup.string()
-    .uuid("Veuillez sélectionner un niveau")
-    .required("Niveau d'étude obligatoire"),
+
+  // Entreprise
+  nomEntreprise: Yup.string()
+    .min(2, "Minimum 2 caractères")
+    .max(150, "Maximum 150 caractères")
+    .required("Nom de l'entreprise obligatoire"),
   domaineId: Yup.string()
     .uuid("Veuillez sélectionner un domaine")
-    .required("Domaine obligatoire"),
-  sexe: Yup.string()
-    .oneOf(["masculin", "feminin"], "Sexe invalide")
-    .required("Sexe obligatoire"),
-  etatCivil: Yup.string().required("État civil obligatoire"),
-  ville: Yup.string().required("Ville obligatoire"),
-  dateNaissance: Yup.date()
-    .max(new Date(), "La date de naissance ne peut être dans le futur")
-    .required("Date de naissance obligatoire"),
-  photo: Yup.mixed()
+    .required("Domaine d'activité obligatoire"),
+  adresse: Yup.string()
+    .max(255, "Maximum 255 caractères")
+    .required("Adresse obligatoire"),
+  ville: Yup.string()
+    .min(2, "Minimum 2 caractères")
+    .max(100, "Maximum 100 caractères")
+    .required("Ville obligatoire"),
+  pays: Yup.string()
+    .min(2, "Minimum 2 caractères")
+    .max(100, "Maximum 100 caractères")
+    .required("Pays obligatoire"),
+  codePostal: Yup.string()
+    .max(20, "Maximum 20 caractères")
+    .required("Code postal obligatoire"),
+  description: Yup.string()
+    .max(500, "Maximum 500 caractères")
+    .required("Description obligatoire"),
+  siteWeb: Yup.string()
+    .matches(
+      /^(https?:\/\/)?([\w.-]+\.[a-z]{2,})(\/.*)?$/i,
+      "URL invalide (ex: monsite.com ou https://monsite.com)",
+    )
+    .nullable(),
+
+  // Logo
+  logo: Yup.mixed()
     .nullable()
     .test("fileSize", "Taille max 2Mo", (value) => {
       if (!value) return true;
@@ -111,60 +122,48 @@ const candidatValidationSchema = Yup.object().shape({
       const extension = value?.name?.split(".").pop().toLowerCase();
       return ["jpg", "jpeg", "png"].includes(extension);
     }),
-  curriculumVitae: Yup.mixed()
-    .nullable()
-    .test("fileSize", "Taille max 5Mo", (value) => {
-      if (!value) return true;
-      return value.size <= 5 * 1024 * 1024;
-    })
-    .test("fileFormat", "Formats acceptés: pdf, doc, docx", (value) => {
-      if (!value) return true;
-      const extension = value?.name?.split(".").pop().toLowerCase();
-      return ["pdf", "doc", "docx"].includes(extension);
-    }),
 });
 
-export function RegisterCandidatForm({ domaines, niveaux }) {
-  const { registerCandidat } = useAuth();
+export function RegisterRecruteurForm({ domaines }) {
+  const { registerRecruteur } = useAuth();
   const [step, setStep] = useState(0);
   const [showPassword, setShowPassword] = useState(false);
-  const [datePopoverOpen, setDatePopoverOpen] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
 
   const formik = useFormik({
     initialValues: {
+      civilite: "",
       nom: "",
       prenom: "",
       email: "",
+      telephone: "",
       password: "",
       password_confirmation: "",
-      telephone: "",
-      dateNaissance: null,
-      ville: "",
-      bio: "",
+      nomEntreprise: "",
       domaineId: "",
-      niveauEtudeId: "",
-      photo: null,
-      curriculumVitae: null,
-      role: "CANDIDAT",
-      experience: 0,
-      sexe: "",
-      etatCivil: "",
+      adresse: "",
+      ville: "",
+      pays: "",
+      codePostal: "",
+      description: "",
+      siteWeb: "",
+      logo: null,
+      role: "RECRUTEUR",
     },
-    validationSchema: candidatValidationSchema,
+    validationSchema: recruteurValidationSchema,
     onSubmit: async (values, { setSubmitting }) => {
       try {
         const formData = new FormData();
         Object.entries(values).forEach(([key, value]) => {
           if (value !== null && value !== "") {
-            if (key === "dateNaissance") {
-              formData.append(key, format(value, "yyyy-MM-dd"));
+            if (key === "siteWeb" && !value.match(/^https?:\/\//)) {
+              formData.append(key, `https://${value}`);
             } else {
               formData.append(key, value);
             }
           }
         });
-        await registerCandidat(formData);
+        await registerRecruteur(formData);
         setIsSuccess(true);
         window.scrollTo({ top: 0, behavior: "smooth" });
       } catch {
@@ -182,31 +181,36 @@ export function RegisterCandidatForm({ domaines, niveaux }) {
 
     if (step === 0) {
       const step0Fields = [
+        "civilite",
         "nom",
         "prenom",
         "email",
+        "telephone",
         "password",
         "password_confirmation",
-        "telephone",
       ];
-      step0Fields.forEach((f) => (fieldsToTouch[f] = true));
-      stepHasErrors = step0Fields.some((f) => errors[f]);
+      step0Fields.forEach((f) => {
+        fieldsToTouch[f] = true;
+        if (errors[f]) stepHasErrors = true;
+      });
     } else if (step === 1) {
       const step1Fields = [
-        "sexe",
-        "etatCivil",
-        "dateNaissance",
-        "ville",
+        "nomEntreprise",
         "domaineId",
-        "niveauEtudeId",
-        "experience",
-        "bio",
+        "adresse",
+        "ville",
+        "pays",
+        "codePostal",
+        "description",
+        "siteWeb",
       ];
-      step1Fields.forEach((f) => (fieldsToTouch[f] = true));
-      stepHasErrors = step1Fields.some((f) => errors[f]);
+      step1Fields.forEach((f) => {
+        fieldsToTouch[f] = true;
+        if (errors[f]) stepHasErrors = true;
+      });
     }
 
-    formik.setTouched({ ...formik.touched, ...fieldsToTouch }, true);
+    formik.setTouched({ ...formik.touched, ...fieldsToTouch });
 
     if (!stepHasErrors) {
       setStep(step + 1);
@@ -218,7 +222,7 @@ export function RegisterCandidatForm({ domaines, niveaux }) {
     <Card className="w-full max-w-[580px] border-0 bg-background/80 shadow-2xl shadow-primary/5 backdrop-blur-xl sm:rounded-3xl">
       <CardHeader className="space-y-1 pb-6 pt-8 text-center">
         <CardTitle className="text-3xl font-extrabold tracking-tight text-foreground">
-          Espace Candidat
+          Espace Recruteur
         </CardTitle>
         <CardDescription className="text-base font-medium text-muted-foreground">
           {isSuccess
@@ -251,11 +255,11 @@ export function RegisterCandidatForm({ domaines, niveaux }) {
             <p className="text-muted-foreground max-w-sm mx-auto">
               Un email contenant un lien de confirmation a été envoyé à{" "}
               <strong className="text-foreground">{formik.values.email}</strong>
-              . Veuillez vérifier votre boîte de réception pour activer votre
-              compte.
+              . Veuillez vérifier votre boîte de réception pour activer le
+              compte de votre entreprise.
             </p>
           </div>
-          <div className="pt-4 w-full">
+          <div className="pt-4 w-full px-6">
             <Button asChild className="w-full" size="lg">
               <Link to="/login">Retour à la connexion</Link>
             </Button>
@@ -274,6 +278,44 @@ export function RegisterCandidatForm({ domaines, niveaux }) {
             {/* Step 1: Informations personnelles */}
             {step === 0 && (
               <>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-2">
+                  <div className="space-y-2">
+                    <Label htmlFor="civilite">
+                      Civilité <span className="text-destructive">*</span>
+                    </Label>
+                    <Select
+                      value={formik.values.civilite}
+                      onValueChange={(val) =>
+                        formik.setFieldValue("civilite", val)
+                      }
+                      onOpenChange={(open) => {
+                        if (!open) formik.setFieldTouched("civilite", true);
+                      }}
+                      disabled={formik.isSubmitting}
+                    >
+                      <SelectTrigger
+                        className={`w-full h-10 border-border focus-visible:ring-primary focus-visible:ring-offset-2 transition-all duration-200 ${
+                          formik.touched.civilite && formik.errors.civilite
+                            ? "border-destructive focus-visible:ring-destructive"
+                            : ""
+                        }`}
+                      >
+                        <SelectValue placeholder="Sélectionner" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="M">Monsieur</SelectItem>
+                        <SelectItem value="Mme">Madame</SelectItem>
+                        <SelectItem value="Mlle">Mademoiselle</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    {formik.touched.civilite && formik.errors.civilite && (
+                      <p className="text-xs text-destructive">
+                        {formik.errors.civilite}
+                      </p>
+                    )}
+                  </div>
+                </div>
+
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="prenom">
@@ -282,13 +324,13 @@ export function RegisterCandidatForm({ domaines, niveaux }) {
                     <Input
                       id="prenom"
                       {...formik.getFieldProps("prenom")}
-                      className={`h-10 border-border  focus-visible:ring-primary focus-visible:ring-offset-2 transition-all duration-200 ${
+                      className={`h-10 border-border focus-visible:ring-primary focus-visible:ring-offset-2 transition-all duration-200 ${
                         formik.touched.prenom && formik.errors.prenom
                           ? "border-destructive focus-visible:ring-destructive"
                           : ""
                       }`}
                       disabled={formik.isSubmitting}
-                      placeholder="Abraham"
+                      placeholder="Jean"
                     />
                     {formik.touched.prenom && formik.errors.prenom && (
                       <p className="text-xs text-destructive">
@@ -303,13 +345,13 @@ export function RegisterCandidatForm({ domaines, niveaux }) {
                     <Input
                       id="nom"
                       {...formik.getFieldProps("nom")}
-                      className={`h-10 border-border  focus-visible:ring-primary focus-visible:ring-offset-2 transition-all duration-200 ${
+                      className={`h-10 border-border focus-visible:ring-primary focus-visible:ring-offset-2 transition-all duration-200 ${
                         formik.touched.nom && formik.errors.nom
                           ? "border-destructive focus-visible:ring-destructive"
                           : ""
                       }`}
                       disabled={formik.isSubmitting}
-                      placeholder="KONE"
+                      placeholder="Dupont"
                     />
                     {formik.touched.nom && formik.errors.nom && (
                       <p className="text-xs text-destructive">
@@ -333,7 +375,7 @@ export function RegisterCandidatForm({ domaines, niveaux }) {
                         : ""
                     }`}
                     disabled={formik.isSubmitting}
-                    placeholder="abraham@email.com"
+                    placeholder="contact@entreprise.com"
                   />
                   {formik.touched.email && formik.errors.email && (
                     <p className="text-xs text-destructive">
@@ -441,196 +483,32 @@ export function RegisterCandidatForm({ domaines, niveaux }) {
               </>
             )}
 
-            {/* Step 2: Profil professionnel */}
+            {/* Step 2: Informations Entreprise */}
             {step === 1 && (
               <>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-3">
-                  <div className="space-y-2">
-                    <Label htmlFor="sexe">
-                      Sexe <span className="text-destructive">*</span>
-                    </Label>
-                    <Select
-                      value={formik.values.sexe}
-                      onValueChange={(val) => formik.setFieldValue("sexe", val)}
-                      onOpenChange={(open) => {
-                        if (!open) formik.setFieldTouched("sexe", true);
-                      }}
-                      disabled={formik.isSubmitting}
-                    >
-                      <SelectTrigger
-                        size="lg"
-                        className={`w-full border-border  focus-visible:ring-primary focus-visible:ring-offset-2 transition-all duration-200 ${
-                          formik.touched.sexe && formik.errors.sexe
-                            ? "border-destructive focus-visible:ring-destructive"
-                            : ""
-                        }`}
-                      >
-                        <SelectValue placeholder="Sélectionner" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="masculin">Homme</SelectItem>
-                        <SelectItem value="feminin">Femme</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    {formik.touched.sexe && formik.errors.sexe && (
-                      <p className="text-xs text-destructive">
-                        {formik.errors.sexe}
-                      </p>
-                    )}
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="etatCivil">
-                      État civil <span className="text-destructive">*</span>
-                    </Label>
-                    <Select
-                      value={formik.values.etatCivil}
-                      onValueChange={(val) =>
-                        formik.setFieldValue("etatCivil", val)
-                      }
-                      onOpenChange={(open) => {
-                        if (!open) formik.setFieldTouched("etatCivil", true);
-                      }}
-                      disabled={formik.isSubmitting}
-                    >
-                      <SelectTrigger
-                        size="lg"
-                        className={`w-full border-border focus-visible:ring-primary focus-visible:ring-offset-2 transition-all duration-200 ${
-                          formik.touched.etatCivil && formik.errors.etatCivil
-                            ? "border-destructive focus-visible:ring-destructive"
-                            : ""
-                        }`}
-                      >
-                        <SelectValue placeholder="Sélectionner" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="celibataire">Célibataire</SelectItem>
-                        <SelectItem value="marie">Marié(e)</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    {formik.touched.etatCivil && formik.errors.etatCivil && (
-                      <p className="text-xs text-destructive">
-                        {formik.errors.etatCivil}
-                      </p>
-                    )}
-                  </div>
-                </div>
-
-                <div className="space-y-2 flex flex-col">
-                  <Label htmlFor="dateNaissance">
-                    Date de naissance{" "}
+                <div className="space-y-2">
+                  <Label htmlFor="nomEntreprise">
+                    Nom de l'entreprise{" "}
                     <span className="text-destructive">*</span>
                   </Label>
-                  <Popover
-                    open={datePopoverOpen}
-                    onOpenChange={(open) => {
-                      setDatePopoverOpen(open);
-                      if (!open) {
-                        formik.setFieldTouched("dateNaissance", true);
-                      }
-                    }}
-                  >
-                    <PopoverTrigger asChild>
-                      <Button
-                        id="dateNaissance"
-                        variant={"outline"}
-                        className={cn(
-                          "w-full justify-start text-left font-normal h-10 border-border focus-visible:ring-primary focus-visible:ring-offset-2 transition-all duration-200",
-                          !formik.values.dateNaissance &&
-                            "text-muted-foreground",
-                          formik.touched.dateNaissance &&
-                            formik.errors.dateNaissance &&
-                            "border-destructive focus-visible:ring-destructive",
-                        )}
-                        disabled={formik.isSubmitting}
-                      >
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {formik.values.dateNaissance ? (
-                          format(formik.values.dateNaissance, "PPP", {
-                            locale: fr,
-                          })
-                        ) : (
-                          <span>Sélectionner une date</span>
-                        )}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        mode="single"
-                        selected={formik.values.dateNaissance}
-                        defaultMonth={formik.values.dateNaissance}
-                        captionLayout="dropdown"
-                        fromYear={1900}
-                        toYear={new Date().getFullYear()}
-                        onSelect={(date) => {
-                          formik.setFieldValue("dateNaissance", date);
-                          setTimeout(
-                            () => formik.setFieldTouched("dateNaissance", true),
-                            100,
-                          );
-                          setDatePopoverOpen(false);
-                        }}
-                        disabled={(date) =>
-                          date > new Date() || date < new Date("1900-01-01")
-                        }
-                        initialFocus
-                        locale={fr}
-                      />
-                    </PopoverContent>
-                  </Popover>
-                  {formik.touched.dateNaissance &&
-                    formik.errors.dateNaissance && (
+                  <Input
+                    id="nomEntreprise"
+                    {...formik.getFieldProps("nomEntreprise")}
+                    className={`h-10 border-border focus-visible:ring-primary focus-visible:ring-offset-2 transition-all duration-200 ${
+                      formik.touched.nomEntreprise &&
+                      formik.errors.nomEntreprise
+                        ? "border-destructive focus-visible:ring-destructive"
+                        : ""
+                    }`}
+                    disabled={formik.isSubmitting}
+                    placeholder="Ma Société SARL"
+                  />
+                  {formik.touched.nomEntreprise &&
+                    formik.errors.nomEntreprise && (
                       <p className="text-xs text-destructive">
-                        {formik.errors.dateNaissance}
+                        {formik.errors.nomEntreprise}
                       </p>
                     )}
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="ville">
-                      Ville <span className="text-destructive">*</span>
-                    </Label>
-                    <Input
-                      id="ville"
-                      {...formik.getFieldProps("ville")}
-                      className={`h-10 border-border focus-visible:ring-primary focus-visible:ring-offset-2 transition-all duration-200 ${
-                        formik.touched.ville && formik.errors.ville
-                          ? "border-destructive focus-visible:ring-destructive"
-                          : ""
-                      }`}
-                      disabled={formik.isSubmitting}
-                      placeholder="Ferkessédougou"
-                    />
-                    {formik.touched.ville && formik.errors.ville && (
-                      <p className="text-xs text-destructive">
-                        {formik.errors.ville}
-                      </p>
-                    )}
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="experience">
-                      Expérience (années){" "}
-                      <span className="text-destructive">*</span>
-                    </Label>
-                    <Input
-                      id="experience"
-                      type="number"
-                      min="0"
-                      {...formik.getFieldProps("experience")}
-                      className={`h-10 border-border focus-visible:ring-primary focus-visible:ring-offset-2 transition-all duration-200 ${
-                        formik.touched.experience && formik.errors.experience
-                          ? "border-destructive focus-visible:ring-destructive"
-                          : ""
-                      }`}
-                      disabled={formik.isSubmitting}
-                    />
-                    {formik.touched.experience && formik.errors.experience && (
-                      <p className="text-xs text-destructive">
-                        {formik.errors.experience}
-                      </p>
-                    )}
-                  </div>
                 </div>
 
                 <div className="space-y-2">
@@ -650,172 +528,208 @@ export function RegisterCandidatForm({ domaines, niveaux }) {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="niveauEtudeId">
-                    Niveau d'étude <span className="text-destructive">*</span>
-                  </Label>
-                  <FormikCombobox
-                    formik={formik}
-                    name="niveauEtudeId"
-                    items={niveaux}
-                    labelKey="libelle"
-                    valueKey="id"
-                    placeholder="Sélectionner un niveau d'étude"
-                    disabled={formik.isSubmitting}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="bio">Bio / Présentation</Label>
-                  <Textarea
-                    id="bio"
-                    {...formik.getFieldProps("bio")}
-                    className={`border-border focus-visible:ring-primary focus-visible:ring-offset-2 transition-all duration-200 ${
-                      formik.touched.bio && formik.errors.bio
+                  <Label htmlFor="siteWeb">Site web</Label>
+                  <Input
+                    id="siteWeb"
+                    {...formik.getFieldProps("siteWeb")}
+                    className={`h-10 border-border focus-visible:ring-primary focus-visible:ring-offset-2 transition-all duration-200 ${
+                      formik.touched.siteWeb && formik.errors.siteWeb
                         ? "border-destructive focus-visible:ring-destructive"
                         : ""
                     }`}
                     disabled={formik.isSubmitting}
-                    placeholder="Décrivez-vous en quelques mots…"
+                    placeholder="https://www.monsite.com"
+                  />
+                  {formik.touched.siteWeb && formik.errors.siteWeb && (
+                    <p className="text-xs text-destructive">
+                      {formik.errors.siteWeb}
+                    </p>
+                  )}
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="pays">
+                      Pays <span className="text-destructive">*</span>
+                    </Label>
+                    <Input
+                      id="pays"
+                      {...formik.getFieldProps("pays")}
+                      className={`h-10 border-border focus-visible:ring-primary focus-visible:ring-offset-2 transition-all duration-200 ${
+                        formik.touched.pays && formik.errors.pays
+                          ? "border-destructive focus-visible:ring-destructive"
+                          : ""
+                      }`}
+                      disabled={formik.isSubmitting}
+                      placeholder="Côte d'Ivoire"
+                    />
+                    {formik.touched.pays && formik.errors.pays && (
+                      <p className="text-xs text-destructive">
+                        {formik.errors.pays}
+                      </p>
+                    )}
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="ville">
+                      Ville <span className="text-destructive">*</span>
+                    </Label>
+                    <Input
+                      id="ville"
+                      {...formik.getFieldProps("ville")}
+                      className={`h-10 border-border focus-visible:ring-primary focus-visible:ring-offset-2 transition-all duration-200 ${
+                        formik.touched.codePostal && formik.errors.codePostal
+                          ? "border-destructive focus-visible:ring-destructive"
+                          : ""
+                      }`}
+                      disabled={formik.isSubmitting}
+                      placeholder="Abidjan"
+                    />
+                    {formik.touched.ville && formik.errors.ville && (
+                      <p className="text-xs text-destructive">
+                        {formik.errors.ville}
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="adresse">
+                      Adresse <span className="text-destructive">*</span>
+                    </Label>
+                    <Input
+                      id="adresse"
+                      {...formik.getFieldProps("adresse")}
+                      className={`h-10 border-border focus-visible:ring-primary focus-visible:ring-offset-2 transition-all duration-200 ${
+                        formik.touched.adresse && formik.errors.adresse
+                          ? "border-destructive focus-visible:ring-destructive"
+                          : ""
+                      }`}
+                      disabled={formik.isSubmitting}
+                      placeholder="Rue des Jardins, Cocody"
+                    />
+                    {formik.touched.adresse && formik.errors.adresse && (
+                      <p className="text-xs text-destructive">
+                        {formik.errors.adresse}
+                      </p>
+                    )}
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="codePostal">
+                      Code Postal <span className="text-destructive">*</span>
+                    </Label>
+                    <Input
+                      id="codePostal"
+                      {...formik.getFieldProps("codePostal")}
+                      className={`h-10 border-border focus-visible:ring-primary focus-visible:ring-offset-2 transition-all duration-200 ${
+                        formik.touched.codePostal && formik.errors.codePostal
+                          ? "border-destructive focus-visible:ring-destructive"
+                          : ""
+                      }`}
+                      disabled={formik.isSubmitting}
+                      placeholder="BP 123"
+                    />
+                    {formik.touched.codePostal && formik.errors.codePostal && (
+                      <p className="text-xs text-destructive">
+                        {formik.errors.codePostal}
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="description">
+                    Description de l'entreprise{" "}
+                    <span className="text-destructive">*</span>
+                  </Label>
+                  <Textarea
+                    id="description"
+                    {...formik.getFieldProps("description")}
+                    className={`border-border focus-visible:ring-primary focus-visible:ring-offset-2 transition-all duration-200 ${
+                      formik.touched.description && formik.errors.description
+                        ? "border-destructive focus-visible:ring-destructive"
+                        : ""
+                    }`}
+                    disabled={formik.isSubmitting}
+                    placeholder="Décrivez l'activité de votre entreprise…"
                     rows={3}
                   />
-                  {formik.touched.bio && formik.errors.bio && (
+                  {formik.touched.description && formik.errors.description && (
                     <p className="text-xs text-destructive">
-                      {formik.errors.bio}
+                      {formik.errors.description}
                     </p>
                   )}
                 </div>
               </>
             )}
 
-            {/* Step 3: Documents */}
+            {/* Step 3: Logo */}
             {step === 2 && (
-              <>
-                <div className="space-y-6">
-                  <div className="space-y-2">
-                    <Label htmlFor="photo">Photo de profil</Label>
-                    <div className="flex w-full items-center justify-center">
-                      <label
-                        htmlFor="photo"
-                        className="group flex h-32 w-full cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-muted-foreground/25 bg-muted/10 transition-all hover:border-primary/50 hover:bg-primary/5"
-                      >
-                        <div className="flex flex-col items-center justify-center space-y-2 pb-4 pt-5 text-center px-4">
-                          <Upload className="h-8 w-8 text-muted-foreground transition-colors group-hover:text-primary" />
-                          <div className="space-y-1">
-                            <p className="text-sm font-semibold text-foreground">
-                              {formik.values.photo ? (
-                                <span className="text-primary">
-                                  {formik.values.photo.name}
-                                </span>
-                              ) : (
-                                "Mettez un visage sur votre talent !"
-                              )}
-                            </p>
-                            <p className="text-xs text-muted-foreground">
-                              {formik.values.photo
-                                ? "Cliquez pour modifier votre photo"
-                                : "Cliquez pour uploader votre photo (JPEG, PNG)"}
-                            </p>
-                          </div>
+              <div className="space-y-6">
+                <div className="space-y-2">
+                  <Label htmlFor="logo">Logo de l'entreprise</Label>
+                  <div className="flex w-full items-center justify-center">
+                    <label
+                      htmlFor="logo"
+                      className="group flex h-48 w-full cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-muted-foreground/25 bg-muted/10 transition-all hover:border-primary/50 hover:bg-primary/5"
+                    >
+                      <div className="flex flex-col items-center justify-center space-y-3 pb-6 pt-5 text-center px-4">
+                        <Upload className="h-10 w-10 text-muted-foreground transition-colors group-hover:text-primary" />
+                        <div className="space-y-1">
+                          <p className="text-sm font-semibold text-foreground">
+                            {formik.values.logo ? (
+                              <span className="text-primary">
+                                {formik.values.logo.name}
+                              </span>
+                            ) : (
+                              "Cliquez pour choisir un logo"
+                            )}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            Format portrait ou carré recommandé (JPEG, PNG, max
+                            2Mo)
+                          </p>
                         </div>
-                      </label>
-                      <input
-                        id="photo"
-                        type="file"
-                        accept="image/*"
-                        className="hidden"
-                        onChange={(e) => {
-                          const file = e.currentTarget.files[0];
-                          if (file) {
-                            formik.setFieldValue("photo", file);
-                            setTimeout(
-                              () => formik.setFieldTouched("photo", true),
-                              100,
-                            );
-                          }
-                        }}
-                        onClick={(e) => {
-                          e.currentTarget.value = null;
-                        }}
-                        disabled={formik.isSubmitting}
-                      />
-                    </div>
-                    {formik.touched.photo && formik.errors.photo && (
-                      <p className="text-xs text-destructive mt-1">
-                        {formik.errors.photo}
-                      </p>
-                    )}
+                      </div>
+                    </label>
+                    <input
+                      id="logo"
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.currentTarget.files[0];
+                        if (file) {
+                          formik.setFieldValue("logo", file);
+                          setTimeout(
+                            () => formik.setFieldTouched("logo", true),
+                            100,
+                          );
+                        }
+                      }}
+                      onClick={(e) => {
+                        e.currentTarget.value = null;
+                      }}
+                      disabled={formik.isSubmitting}
+                    />
                   </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="cv">Curriculum Vitae (CV)</Label>
-                    <div className="flex w-full items-center justify-center">
-                      <label
-                        htmlFor="cv"
-                        className="group flex h-32 w-full cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-muted-foreground/25 bg-muted/10 transition-all hover:border-primary/50 hover:bg-primary/5"
-                      >
-                        <div className="flex flex-col items-center justify-center space-y-2 pb-4 pt-5 text-center px-4">
-                          <Upload className="h-8 w-8 text-muted-foreground transition-colors group-hover:text-primary" />
-                          <div className="space-y-1">
-                            <p className="text-sm font-semibold text-foreground">
-                              {formik.values.curriculumVitae ? (
-                                <span className="text-primary">
-                                  {formik.values.curriculumVitae.name}
-                                </span>
-                              ) : (
-                                "Déposez votre CV ici"
-                              )}
-                            </p>
-                            <p className="text-xs text-muted-foreground">
-                              {formik.values.curriculumVitae
-                                ? "Cliquez pour modifier le fichier"
-                                : "Le document clé pour faire décoller votre carrière (PDF, DOC)"}
-                            </p>
-                          </div>
-                        </div>
-                      </label>
-                      <input
-                        id="cv"
-                        type="file"
-                        accept=".pdf,.doc,.docx"
-                        className="hidden"
-                        onChange={(e) => {
-                          const file = e.currentTarget.files[0];
-                          if (file) {
-                            formik.setFieldValue("curriculumVitae", file);
-                            setTimeout(
-                              () =>
-                                formik.setFieldTouched("curriculumVitae", true),
-                              100,
-                            );
-                          }
-                        }}
-                        onClick={(e) => {
-                          e.currentTarget.value = null;
-                        }}
-                        disabled={formik.isSubmitting}
-                      />
-                    </div>
-                    {formik.touched.curriculumVitae &&
-                      formik.errors.curriculumVitae && (
-                        <p className="text-xs text-destructive mt-1">
-                          {formik.errors.curriculumVitae}
-                        </p>
-                      )}
-                  </div>
+                  {formik.touched.logo && formik.errors.logo && (
+                    <p className="text-xs text-destructive mt-1">
+                      {formik.errors.logo}
+                    </p>
+                  )}
                 </div>
 
                 <Alert className="bg-emerald-50/50 border-emerald-200/50 dark:bg-emerald-500/5 dark:border-emerald-500/20">
                   <AlertDescription className="text-emerald-700/90 dark:text-emerald-400/90">
                     <span>
-                      Un email de vérification sera envoyé à{" "}
-                      <strong className="text-emerald-900 dark:text-emerald-200">
-                        {formik.values.email}
-                      </strong>{" "}
-                      après votre inscription.
+                      En vous inscrivant, vous pourrez immédiatement commencer à
+                      publier vos offres de recrutement. Un email de validation
+                      sera envoyé à <strong>{formik.values.email}</strong>.
                     </span>
                   </AlertDescription>
                 </Alert>
-              </>
+              </div>
             )}
           </CardContent>
 
@@ -857,7 +771,7 @@ export function RegisterCandidatForm({ domaines, niveaux }) {
                       Inscription…
                     </>
                   ) : (
-                    "S'inscrire"
+                    "S'inscrire comme recruteur"
                   )}
                 </Button>
               )}
@@ -873,10 +787,10 @@ export function RegisterCandidatForm({ domaines, niveaux }) {
               </Link>
               {" · "}
               <Link
-                to="/register/recruteur"
+                to="/register/candidat"
                 className="text-primary font-medium hover:underline"
               >
-                Inscription recruteur
+                Inscription candidat
               </Link>
             </div>
           </CardFooter>
