@@ -10,37 +10,13 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Building2, MapPin, Tag, ArrowRight } from "lucide-react";
-
-/* URL de base du serveur pour les assets statiques */
-const API_BASE = (
-  import.meta.env.VITE_API_URL || "http://localhost:3333/api"
-).replace(/\/api$/, "");
-
-/* Palettes premium pour générer une couleur de fond sympa si pas de logo */
-const palettes = [
-  { bg: "#FEE2E2", fg: "#991B1B" },
-  { bg: "#D1FAE5", fg: "#065F46" },
-  { bg: "#DBEAFE", fg: "#1E40AF" },
-  { bg: "#FEF3C7", fg: "#92400E" },
-  { bg: "#EDE9FE", fg: "#5B21B6" },
-  { bg: "#CCFBF1", fg: "#134E4A" },
-  { bg: "#FFEDD5", fg: "#9A3412" },
-  { bg: "#FCE7F3", fg: "#9D174D" },
-];
+import { MapPin, Tag, ArrowRight } from "lucide-react";
+import { cn } from "@/lib/utils";
+import CompanyAvatar from "@/components/shared/CompanyAvatar";
 
 export default function CompanyListCard({ entreprise }) {
   const nom = entreprise.nomEntreprise || "Entreprise";
   const domaine = entreprise.domaine?.libelle;
-  const logoUrl = entreprise.logoPath
-    ? `${API_BASE}${entreprise.logoPath}`
-    : null;
-  const [imgError, setImgError] = useState(false);
-
-  const idx = (nom.charCodeAt(0) || 0) % palettes.length;
-  const { bg, fg } = palettes[idx];
-
-  const hasLogo = logoUrl && !imgError;
 
   return (
     <Card className="group relative mx-auto w-full max-w-sm sm:max-w-none overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-primary/5 bg-card border-border/60 flex flex-col h-full rounded-2xl pt-0 cursor-pointer">
@@ -53,21 +29,11 @@ export default function CompanyListCard({ entreprise }) {
           {/* Overlay subtil au survol (similaire à bg-black/35 mais interactif) */}
           <div className="absolute inset-0 z-30 bg-black/0 group-hover:bg-black/5 transition-colors duration-300 pointer-events-none" />
 
-          {hasLogo ? (
-            <img
-              src={logoUrl}
-              alt={`${nom} logo`}
-              className="relative z-20 w-full h-full object-contain p-4 group-hover:scale-105 transition-transform duration-500"
-              onError={() => setImgError(true)}
-            />
-          ) : (
-            <div
-              className="relative z-20 w-full h-full flex items-center justify-center"
-              style={{ backgroundColor: bg, color: fg }}
-            >
-              <Building2 className="w-16 h-16 opacity-50 mix-blend-multiply group-hover:scale-110 transition-transform duration-500" />
-            </div>
-          )}
+          <CompanyAvatar
+            name={nom}
+            logoPath={entreprise.logoPath}
+            className="relative z-20 w-full h-full rounded-none border-0 bg-transparent"
+          />
         </div>
 
         {/* CONTENU (DEUXIÈME PARTIE : Haut et Bas) */}

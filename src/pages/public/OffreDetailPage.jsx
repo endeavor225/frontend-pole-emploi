@@ -67,38 +67,7 @@ function TypeOfreBadge({ type }) {
   );
 }
 
-/* ── Logo ou icône de l'entreprise ── */
-function CompanyAvatar({ name = "", logoPath = null, size = 64 }) {
-  const [imgError, setImgError] = useState(false);
-  const logoUrl = logoPath && !imgError ? `${API_BASE}${logoPath}` : null;
-
-  if (logoUrl) {
-    return (
-      <div
-        className="shrink-0 rounded-2xl overflow-hidden border border-border bg-muted/30"
-        style={{ width: size, height: size }}
-      >
-        <img
-          src={logoUrl}
-          alt={name}
-          className="w-full h-full object-contain"
-          onError={() => setImgError(true)}
-        />
-      </div>
-    );
-  }
-  return (
-    <div
-      className="flex items-center justify-center rounded-2xl shrink-0 bg-muted/50 border border-border"
-      style={{ width: size, height: size }}
-    >
-      <Building2
-        style={{ width: size * 0.5, height: size * 0.5 }}
-        className="text-muted-foreground"
-      />
-    </div>
-  );
-}
+import CompanyAvatar from "@/components/shared/CompanyAvatar";
 
 /* ── Ligne d'info réutilisable ── */
 function InfoRow({ icon: Icon, label, value, className = "" }) {

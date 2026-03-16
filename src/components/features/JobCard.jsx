@@ -11,68 +11,12 @@ import {
   Tag,
   CalendarX,
   Star,
-  Building2,
   Bookmark,
 } from "lucide-react";
 
-import { timeAgo } from "@/lib/utils";
+import { timeAgo, cn } from "@/lib/utils";
 import { TYPE_OFFRE_COLORS } from "@/lib/constants";
-
-/* URL de base du serveur pour les assets statiques */
-const API_BASE = (
-  import.meta.env.VITE_API_URL || "http://localhost:3333/api"
-).replace(/\/api$/, "");
-
-/* Avatar de l'entreprise — logo réel si disponible, sinon initiales */
-function CompanyAvatar({ name = "", logoPath = null }) {
-  const [imgError, setImgError] = useState(false);
-
-  // Palette de couleurs dérivée du premier caractère du nom
-  const palettes = [
-    { bg: "#FEE2E2", fg: "#991B1B" },
-    { bg: "#D1FAE5", fg: "#065F46" },
-    { bg: "#DBEAFE", fg: "#1E40AF" },
-    { bg: "#FEF3C7", fg: "#92400E" },
-    { bg: "#EDE9FE", fg: "#5B21B6" },
-    { bg: "#CCFBF1", fg: "#134E4A" },
-    { bg: "#FFEDD5", fg: "#9A3412" },
-    { bg: "#FCE7F3", fg: "#9D174D" },
-  ];
-  const idx = (name.charCodeAt(0) || 0) % palettes.length;
-  const { bg, fg } = palettes[idx];
-
-  /* URL complète du logo */
-  const logoUrl = logoPath && !imgError ? `${API_BASE}${logoPath}` : null;
-
-  if (logoUrl) {
-    return (
-      <div
-        className="shrink-0 rounded-xl overflow-hidden border border-border bg-muted/30"
-        style={{ width: 152, height: 152 }}
-      >
-        <img
-          src={logoUrl}
-          alt={name}
-          className="w-full h-full object-contain"
-          onError={() => setImgError(true)}
-        />
-      </div>
-    );
-  }
-
-  const size = 152;
-  return (
-    <div
-      className="flex items-center justify-center rounded-xl font-semibold text-sm select-none shrink-0"
-      style={{ backgroundColor: bg, color: fg, width: size, height: size }}
-    >
-      <Building2
-        style={{ width: size * 0.5, height: size * 0.5 }}
-        className="text-muted-foreground"
-      />
-    </div>
-  );
-}
+import CompanyAvatar from "@/components/shared/CompanyAvatar";
 
 /* ── Badge coloré selon le type d'offre ─────────────────── */
 function TypeOfreBadge({ type }) {
@@ -127,7 +71,11 @@ export default function JobCard({ offre, isFavori, onToggleFavori }) {
         <div className="flex flex-col items-center sm:flex-row sm:items-center gap-4">
           {/* Logo cliquable */}
 
-          <CompanyAvatar name={nomEntreprise} logoPath={entreprise.logoPath} />
+          <CompanyAvatar
+            name={nomEntreprise}
+            logoPath={entreprise.logoPath}
+            size={152}
+          />
 
           {/* Body */}
           <div className="flex-1 min-w-0">

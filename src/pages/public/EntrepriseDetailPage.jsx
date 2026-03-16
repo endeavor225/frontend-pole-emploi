@@ -30,50 +30,7 @@ const API_BASE = (
   import.meta.env.VITE_API_URL || "http://localhost:3333/api"
 ).replace(/\/api$/, "");
 
-/* ── Avatar de l'entreprise ── */
-function CompanyAvatar({ name = "", logoPath = null, size = 96 }) {
-  const [imgError, setImgError] = useState(false);
-  const logoUrl = logoPath && !imgError ? `${API_BASE}${logoPath}` : null;
-
-  const palettes = [
-    { bg: "#FEE2E2", fg: "#991B1B" },
-    { bg: "#D1FAE5", fg: "#065F46" },
-    { bg: "#DBEAFE", fg: "#1E40AF" },
-    { bg: "#FEF3C7", fg: "#92400E" },
-    { bg: "#EDE9FE", fg: "#5B21B6" },
-    { bg: "#CCFBF1", fg: "#134E4A" },
-    { bg: "#FFEDD5", fg: "#9A3412" },
-    { bg: "#FCE7F3", fg: "#9D174D" },
-  ];
-  const idx = (name?.charCodeAt(0) || 0) % palettes.length;
-  const { bg, fg } = palettes[idx];
-
-  if (logoUrl) {
-    return (
-      <div
-        className="shrink-0 rounded-2xl overflow-hidden border border-border bg-muted/30"
-        style={{ width: size, height: size }}
-      >
-        <img
-          src={logoUrl}
-          alt={name}
-          className="w-full h-full object-contain"
-          onError={() => setImgError(true)}
-        />
-      </div>
-    );
-  }
-
-  return (
-    <div
-      className="flex items-center justify-center rounded-2xl shrink-0 font-bold text-2xl"
-      style={{ width: size, height: size, backgroundColor: bg, color: fg }}
-    >
-      <Building2 style={{ width: size * 0.45, height: size * 0.45 }} />
-    </div>
-  );
-}
-
+import CompanyAvatar from "@/components/shared/CompanyAvatar";
 /* ── Ligne d'info ── */
 function InfoRow({ icon: Icon, label, value, href }) {
   if (!value) return null;
