@@ -35,6 +35,8 @@ const ResetPasswordPage = lazy(
   () => import("@/pages/public/ResetPasswordPage"),
 );
 const VerifyEmailPage = lazy(() => import("@/pages/public/VerifyEmailPage"));
+const RegisterChoicePage = lazy(() => import("@/pages/public/RegisterChoicePage"));
+const CGUPage = lazy(() => import("@/pages/public/CGUPage"));
 
 // Candidat
 const CandidatDashboard = lazy(() => import("@/pages/candidat/DashboardPage"));
@@ -145,6 +147,14 @@ export const router = createBrowserRouter([
         ),
       },
       {
+        path: "/register",
+        element: (
+          <Lazy>
+            <RegisterChoicePage />
+          </Lazy>
+        ),
+      },
+      {
         path: "/register/candidat",
         element: (
           <Lazy>
@@ -181,6 +191,14 @@ export const router = createBrowserRouter([
         element: (
           <Lazy>
             <VerifyEmailPage />
+          </Lazy>
+        ),
+      },
+      {
+        path: "/cgu",
+        element: (
+          <Lazy>
+            <CGUPage />
           </Lazy>
         ),
       },
