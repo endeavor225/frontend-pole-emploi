@@ -26,6 +26,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { PhoneInput } from "@/components/reui/phone-input";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Card,
   CardContent,
@@ -122,6 +123,9 @@ const candidatValidationSchema = Yup.object().shape({
       const extension = value?.name?.split(".").pop().toLowerCase();
       return ["pdf", "doc", "docx"].includes(extension);
     }),
+  acceptCGU: Yup.boolean()
+    .oneOf([true], "Vous devez accepter les CGU")
+    .required(),
 });
 
 export function RegisterCandidatForm({ domaines, niveaux }) {
@@ -150,6 +154,7 @@ export function RegisterCandidatForm({ domaines, niveaux }) {
       experience: 0,
       sexe: "",
       etatCivil: "",
+      acceptCGU: false,
     },
     validationSchema: candidatValidationSchema,
     onSubmit: async (values, { setSubmitting }) => {
@@ -803,7 +808,6 @@ export function RegisterCandidatForm({ domaines, niveaux }) {
                       )}
                   </div>
                 </div>
-
                 <Alert className="bg-emerald-50/50 border-emerald-200/50 dark:bg-emerald-500/5 dark:border-emerald-500/20">
                   <AlertDescription className="text-emerald-700/90 dark:text-emerald-400/90">
                     <span>
@@ -815,6 +819,44 @@ export function RegisterCandidatForm({ domaines, niveaux }) {
                     </span>
                   </AlertDescription>
                 </Alert>
+
+                <div className="mt-6 flex items-start gap-2 px-2">
+                  <Checkbox
+                    id="acceptCGU"
+                    checked={formik.values.acceptCGU}
+                    onCheckedChange={(checked) =>
+                      formik.setFieldValue("acceptCGU", checked)
+                    }
+                    className={`mt-0.5 border-border focus-visible:ring-primary focus-visible:ring-offset-2 transition-all duration-200 ${
+                      formik.touched.acceptCGU && formik.errors.acceptCGU
+                        ? "border-destructive focus-visible:ring-destructive"
+                        : ""
+                    }`}
+                  />
+                  <div className="flex-1">
+                    <Label
+                      htmlFor="acceptCGU"
+                      className="text-sm font-medium cursor-pointer text-foreground/90 select-none"
+                    >
+                      J'accepte les{" "}
+                      <Link
+                        to="/cgu"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-primary hover:underline font-bold"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        Conditions Générales d'Utilisation
+                      </Link>{" "}
+                      <span className="text-destructive">*</span>
+                    </Label>
+                    {formik.touched.acceptCGU && formik.errors.acceptCGU && (
+                      <p className="text-xs text-destructive mt-1 font-medium">
+                        {formik.errors.acceptCGU}
+                      </p>
+                    )}
+                  </div>
+                </div>
               </>
             )}
           </CardContent>
@@ -857,7 +899,7 @@ export function RegisterCandidatForm({ domaines, niveaux }) {
                       Inscription…
                     </>
                   ) : (
-                    "S'inscrire"
+                    "Je m'inscris"
                   )}
                 </Button>
               )}

@@ -18,6 +18,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { PhoneInput } from "@/components/reui/phone-input";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Card,
   CardContent,
@@ -122,6 +123,9 @@ const recruteurValidationSchema = Yup.object().shape({
       const extension = value?.name?.split(".").pop().toLowerCase();
       return ["jpg", "jpeg", "png"].includes(extension);
     }),
+  acceptCGU: Yup.boolean()
+    .oneOf([true], "Vous devez accepter les CGU")
+    .required(),
 });
 
 export function RegisterRecruteurForm({ domaines }) {
@@ -148,6 +152,7 @@ export function RegisterRecruteurForm({ domaines }) {
       description: "",
       siteWeb: "",
       logo: null,
+      acceptCGU: false,
       role: "RECRUTEUR",
     },
     validationSchema: recruteurValidationSchema,
@@ -730,6 +735,44 @@ export function RegisterRecruteurForm({ domaines }) {
                     </span>
                   </AlertDescription>
                 </Alert>
+
+                <div className="flex items-start gap-2 px-2 py-1">
+                  <Checkbox
+                    id="acceptCGU"
+                    checked={formik.values.acceptCGU}
+                    onCheckedChange={(checked) =>
+                      formik.setFieldValue("acceptCGU", checked)
+                    }
+                    className={`mt-0.5 border-border focus-visible:ring-primary focus-visible:ring-offset-2 transition-all duration-200 ${
+                      formik.touched.acceptCGU && formik.errors.acceptCGU
+                        ? "border-destructive focus-visible:ring-destructive"
+                        : ""
+                    }`}
+                  />
+                  <div className="flex-1">
+                    <Label
+                      htmlFor="acceptCGU"
+                      className="text-sm font-medium cursor-pointer text-foreground/90 select-none"
+                    >
+                      J'accepte les{" "}
+                      <Link
+                        to="/cgu"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-primary hover:underline font-bold"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        Conditions Générales d'Utilisation
+                      </Link>{" "}
+                      <span className="text-destructive">*</span>
+                    </Label>
+                    {formik.touched.acceptCGU && formik.errors.acceptCGU && (
+                      <p className="text-xs text-destructive mt-1 font-medium">
+                        {formik.errors.acceptCGU}
+                      </p>
+                    )}
+                  </div>
+                </div>
               </div>
             )}
           </CardContent>
@@ -772,7 +815,7 @@ export function RegisterRecruteurForm({ domaines }) {
                       Inscription…
                     </>
                   ) : (
-                    "S'inscrire comme recruteur"
+                    "Je m'inscris"
                   )}
                 </Button>
               )}
