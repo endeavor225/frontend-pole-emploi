@@ -38,7 +38,8 @@ export const STATUT_CANDIDATURE_VARIANTS = {
 // Types d'offre
 // ========================
 export const TYPES_OFFRE = [
-  { value: "Emploi", label: "Emploi" },
+  { value: "CDI", label: "CDI" },
+  { value: "CDD", label: "CDD" },
   { value: "Stage", label: "Stage" },
   { value: "Interim", label: "Intérim" },
   { value: "Freelance", label: "Freelance" },
@@ -47,11 +48,12 @@ export const TYPES_OFFRE = [
 
 /** Couleurs de badge par type d'offre */
 export const TYPE_OFFRE_COLORS = {
-  Emploi: { bg: "#DBEAFE", text: "#1D4ED8", border: "#BFDBFE" }, // bleu
+  CDI: { bg: "#FEF3C7", text: "#B45309", border: "#FDE68A" }, // ambre
+  CDD: { bg: "#CFFAFE", text: "#0E7490", border: "#A5F3FC" }, // cyan
   Stage: { bg: "#EDE9FE", text: "#6D28D9", border: "#DDD6FE" }, // violet
-  Interim: { bg: "#FEF3C7", text: "#B45309", border: "#FDE68A" }, // ambre
+  Interim: { bg: "#E0E7FF", text: "#4338CA", border: "#C7D2FE" }, // indigo
   Freelance: { bg: "#D1FAE5", text: "#065F46", border: "#A7F3D0" }, // vert
-  Consultance: { bg: "#CFFAFE", text: "#0E7490", border: "#A5F3FC" }, // cyan
+  Consultance: { bg: "#DBEAFE", text: "#1D4ED8", border: "#BFDBFE" }, // bleu
 };
 
 /** Options de tri pour la page des offres */

@@ -16,7 +16,7 @@ import CompanyAvatar from "@/components/shared/CompanyAvatar";
 
 export default function CompanyListCard({ entreprise }) {
   const nom = entreprise.nomEntreprise || "Entreprise";
-  const domaine = entreprise.domaine?.libelle;
+  const domaines = entreprise.domaines || [];
 
   return (
     <Card className="group relative mx-auto w-full max-w-sm sm:max-w-none overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-primary/5 bg-card border-border/60 flex flex-col h-full rounded-2xl pt-0 cursor-pointer">
@@ -41,14 +41,15 @@ export default function CompanyListCard({ entreprise }) {
           {/* Informations Utiles en HAUT */}
           <CardHeader className="p-0 flex-none mb-4">
             <div className="flex flex-wrap items-center gap-2 mb-3">
-              {domaine && (
+              {domaines.map((dom) => (
                 <Badge
+                  key={dom.id}
                   variant="secondary"
                   className="font-medium bg-primary/10 text-primary hover:bg-primary/20 transition-colors border-0"
                 >
-                  {domaine}
+                  {dom.libelle}
                 </Badge>
-              )}
+              ))}
               {entreprise.ville && (
                 <Badge
                   variant="outline"

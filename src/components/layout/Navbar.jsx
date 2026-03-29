@@ -15,7 +15,7 @@ import { useAuthStore } from "@/store/authStore";
 import { useUiStore } from "@/store/uiStore";
 import { useNotifications } from "@/hooks/useNotifications";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -26,9 +26,12 @@ import {
 import { Badge } from "@/components/ui/badge";
 import api from "@/api/axios";
 import { AUTH } from "@/api/endpoints";
-//import { Logo } from "@/components/shared/Logo";
 import { toast } from "sonner";
 import logoImg from "/logo.png";
+
+const API_BASE = (
+  import.meta.env.VITE_API_URL || "http://localhost:3333/api"
+).replace(/\/api$/, "");
 
 export function Navbar() {
   const navigate = useNavigate();
@@ -64,6 +67,17 @@ export function Navbar() {
 
   const dashboardPath =
     user?.role === "RECRUTEUR" ? "/recruteur/dashboard" : "/candidat/dashboard";
+
+  const userPhotoUrl =
+    user?.role === "CANDIDAT"
+      ? user.candidat?.photoPath
+        ? `${API_BASE}${user.candidat.photoPath}`
+        : null
+      : user?.role === "RECRUTEUR"
+        ? user.entreprise?.logoPath
+          ? `${API_BASE}${user.entreprise.logoPath}`
+          : null
+        : null;
 
   return (
     <>
@@ -103,6 +117,13 @@ export function Navbar() {
                     className="h-8 w-8 cursor-pointer"
                     onClick={() => navigate(dashboardPath)}
                   >
+                    {userPhotoUrl && (
+                      <AvatarImage
+                        src={userPhotoUrl}
+                        alt={user?.prenom}
+                        className="object-cover object-top"
+                      />
+                    )}
                     <AvatarFallback className="bg-primary text-white text-xs font-bold">
                       {getInitials(user)}
                     </AvatarFallback>
@@ -169,19 +190,6 @@ export function Navbar() {
               À propos
             </Link>
 
-            {/* Theme toggle */}
-            {/* <button
-              onClick={toggleTheme}
-              className="hidden lg:flex ml-4 lg:mt-0 focus:outline-none items-center justify-center p-2"
-            >
-              {theme === "light" ? (
-                <Moon className="h-5 w-5 hover:text-primary transition-colors" />
-              ) : (
-                <Sun className="h-5 w-5 hover:text-primary transition-colors" />
-              )}
-              <span className="sr-only">Thème</span>
-            </button> */}
-
             {/* ── Auth Desktop (Bell + Avatar) ── */}
             {isAuthenticated ? (
               <>
@@ -204,6 +212,13 @@ export function Navbar() {
                     <DropdownMenuTrigger asChild>
                       <button className="relative h-9 w-9 rounded-full focus:outline-none hover:scale-101 transition-transform">
                         <Avatar className="h-9 w-9">
+                          {userPhotoUrl && (
+                            <AvatarImage
+                              src={userPhotoUrl}
+                              alt={user?.prenom}
+                              className="object-cover object-top"
+                            />
+                          )}
                           <AvatarFallback className="bg-primary text-white text-xs font-bold">
                             {getInitials(user)}
                           </AvatarFallback>

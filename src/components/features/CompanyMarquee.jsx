@@ -49,11 +49,19 @@ export default function CompanyMarquee() {
       whileInView="visible"
       viewport={{ once: true }}
       variants={fadeInUp}
-      className="max-w-7xl mx-auto mt-10 mb-20"
+      className="max-w-7xl mx-auto mt-8 mb-15"
     >
-      <h1 className="text-center mb-10 text-[#696984] font-semibold text-xl tracking-tight">
-        Les entreprises qui recrutent
-      </h1>
+      <div className="text-center mb-10 px-4">
+        <h1 className="text-center font-bold text-foreground my-4 text-4xl">
+          Ils nous{" "}
+          <span className="text-primary tracking-wide">font confiance.</span>
+        </h1>
+        <div className="w-24 h-1.5 bg-primary mx-auto rounded-full"></div>
+      </div>
+      <p className="text-center mb-5 leading-relaxed text-[#696984] text-xl font-medium">
+        Découvrez les entreprises qui recrutent leurs talents sur notre
+        plateforme
+      </p>
 
       {isLoading ? (
         <div className="flex justify-center items-center py-10 scale-150">
