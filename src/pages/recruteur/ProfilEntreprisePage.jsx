@@ -15,6 +15,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Combobox,
+  ComboboxChips,
+  ComboboxChip,
+  ComboboxChipsInput,
+  ComboboxContent,
+  ComboboxEmpty,
+  ComboboxList,
+  ComboboxItem,
+  ComboboxValue,
+  useComboboxAnchor,
+} from "@/components/ui/combobox";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Loader2, Upload, Save, Building2 } from "lucide-react";
@@ -41,7 +53,7 @@ export default function ProfilEntreprisePage() {
     siteWeb: "",
     adresse: "",
     ville: "",
-    domaineId: "",
+    domaineIds: [],
     secteurActiviteId: "",
     logo: null,
   });
@@ -58,7 +70,7 @@ export default function ProfilEntreprisePage() {
         siteWeb: p.siteWeb || "",
         adresse: p.adresse || "",
         ville: p.ville || "",
-        domaineId: p.domaineId || "",
+        domaineIds: p.domaines?.map((d) => d.id) || (p.domaineId ? [p.domaineId] : []),
         secteurActiviteId: p.secteurActiviteId || "",
         logo: null,
       });
@@ -76,8 +88,12 @@ export default function ProfilEntreprisePage() {
     try {
       const formData = new FormData();
       Object.entries(form).forEach(([key, value]) => {
-        if (value !== null && value !== "") {
-          formData.append(key, value);
+        if (value !== null && value !== "" && (!Array.isArray(value) || value.length > 0)) {
+          if (Array.isArray(value)) {
+            value.forEach((v) => formData.append(key, v));
+          } else {
+            formData.append(key, value);
+          }
         }
       });
       await api.put("/entreprises/me", formData, {
@@ -215,23 +231,45 @@ export default function ProfilEntreprisePage() {
               />
             </div>
             <div className="space-y-2">
-              <Label>Domaine</Label>
-              <Select
-                value={form.domaineId}
-                onValueChange={updateSelect("domaineId")}
+              <Label>Domaines d'activité</Label>
+              <Combobox
+                multiple
+                autoHighlight
+                items={domaines.map((d) => d.libelle)}
+                value={domaines
+                  .filter((d) => form.domaineIds.includes(d.id))
+                  .map((d) => d.libelle)}
+                onValueChange={(labels) => {
+                  const ids = labels
+                    .map((l) => domaines.find((d) => d.libelle === l)?.id)
+                    .filter(Boolean);
+                  setForm({ ...form, domaineIds: ids });
+                }}
                 disabled={loading}
               >
-                <SelectTrigger>
-                  <SelectValue placeholder="Sélectionner" />
-                </SelectTrigger>
-                <SelectContent>
-                  {domaines.map((d) => (
-                    <SelectItem key={d.id} value={d.id}>
-                      {d.libelle}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                <ComboboxChips className="min-h-10 w-full">
+                  <ComboboxValue>
+                    {(values) => (
+                      <>
+                        {values.map((value) => (
+                          <ComboboxChip key={value}>{value}</ComboboxChip>
+                        ))}
+                        <ComboboxChipsInput placeholder="Sélectionner un ou plusieurs domaines..." />
+                      </>
+                    )}
+                  </ComboboxValue>
+                </ComboboxChips>
+                <ComboboxContent>
+                  <ComboboxEmpty>Aucun résultat.</ComboboxEmpty>
+                  <ComboboxList>
+                    {(label) => (
+                      <ComboboxItem key={label} value={label}>
+                        {label}
+                      </ComboboxItem>
+                    )}
+                  </ComboboxList>
+                </ComboboxContent>
+              </Combobox>
             </div>
             <div className="space-y-2">
               <Label>Secteur d'activité</Label>
