@@ -39,6 +39,7 @@ import {
   ArrowRight,
   CheckCircle2,
 } from "lucide-react";
+import { FormikMultiCombobox } from "@/components/shared/FormikMultiCombobox";
 
 const STEPS = [
   "Informations personnelles",
@@ -84,8 +85,9 @@ const recruteurValidationSchema = Yup.object().shape({
     .min(2, "Minimum 2 caractères")
     .max(150, "Maximum 150 caractères")
     .required("Nom de l'entreprise obligatoire"),
-  domaineId: Yup.string()
-    .uuid("Veuillez sélectionner un domaine")
+  domaineIds: Yup.array()
+    .of(Yup.string().uuid("ID de domaine invalide"))
+    .min(1, "Veuillez sélectionner au moins un domaine")
     .required("Domaine d'activité obligatoire"),
   adresse: Yup.string()
     .max(255, "Maximum 255 caractères")
@@ -144,7 +146,7 @@ export function RegisterRecruteurForm({ domaines }) {
       password: "",
       password_confirmation: "",
       nomEntreprise: "",
-      domaineId: "",
+      domaineIds: [],
       adresse: "",
       ville: "",
       pays: "",
@@ -160,8 +162,10 @@ export function RegisterRecruteurForm({ domaines }) {
       try {
         const formData = new FormData();
         Object.entries(values).forEach(([key, value]) => {
-          if (value !== null && value !== "") {
-            if (key === "siteWeb" && !value.match(/^https?:\/\//)) {
+          if (value !== null && value !== "" && (!Array.isArray(value) || value.length > 0)) {
+            if (Array.isArray(value)) {
+              value.forEach((v) => formData.append(key, v));
+            } else if (key === "siteWeb" && typeof value === "string" && !value.match(/^https?:\/\//)) {
               formData.append(key, `https://${value}`);
             } else {
               formData.append(key, value);
@@ -201,7 +205,7 @@ export function RegisterRecruteurForm({ domaines }) {
     } else if (step === 1) {
       const step1Fields = [
         "nomEntreprise",
-        "domaineId",
+        "domaineIds",
         "adresse",
         "ville",
         "pays",
@@ -518,13 +522,13 @@ export function RegisterRecruteurForm({ domaines }) {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="domaineId">
+                  <Label htmlFor="domaineIds">
                     Domaine d'activité{" "}
                     <span className="text-destructive">*</span>
                   </Label>
-                  <FormikCombobox
+                  <FormikMultiCombobox
                     formik={formik}
-                    name="domaineId"
+                    name="domaineIds"
                     items={domaines}
                     labelKey="libelle"
                     valueKey="id"
