@@ -132,7 +132,7 @@ export default function EntrepriseDetailPage() {
   }
 
   const nom = entreprise.nomEntreprise || "Entreprise";
-  const domaine = entreprise.domaine?.libelle ?? null;
+  const domaines = entreprise.domaines || [];
   const secteur = entreprise.secteurActivite?.libelle ?? null;
 
   return (
@@ -167,15 +167,16 @@ export default function EntrepriseDetailPage() {
               </h1>
 
               <div className="flex flex-wrap items-center gap-2">
-                {domaine && (
+                {domaines.map((dom) => (
                   <Badge
+                    key={dom.id}
                     variant="secondary"
                     className="px-3 py-1 font-medium bg-primary/10 text-primary border-0"
                   >
                     <Tag className="w-3.5 h-3.5 mr-1.5" />
-                    {domaine}
+                    {dom.libelle}
                   </Badge>
-                )}
+                ))}
                 {secteur && (
                   <Badge
                     variant="outline"

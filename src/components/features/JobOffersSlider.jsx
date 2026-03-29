@@ -29,7 +29,7 @@ export default function JobOffersSlider() {
   if (!offres || offres.length === 0) return null;
 
   return (
-    <section className="py-20 overflow-hidden">
+    <section className="py-15 overflow-hidden">
       <div className="container px-4 mx-auto max-w-7x">
         <div className="text-center mb-16 px-4">
           <h2 className="text-4xl md:text-5xl font-black text-[#2f327d] mb-4 tracking-tight">
