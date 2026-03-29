@@ -6,7 +6,7 @@ import { useAuthStore } from "@/store/authStore";
 import { useFavoris, ajouterFavori, supprimerFavori } from "@/hooks/useFavoris";
 import { LoadingSpinner } from "@/components/shared/LoadingSpinner";
 import { EmptyState } from "@/components/shared/EmptyState";
-import { AppPagination } from "@/components/shared/Pagination";
+
 import JobCard from "@/components/features/JobCard";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -18,6 +18,7 @@ import {
   Phone,
   Briefcase,
   ArrowLeft,
+  ArrowRight,
   Tag,
   Mail,
   User,
@@ -62,24 +63,31 @@ function InfoRow({ icon: Icon, label, value, href }) {
 export default function EntrepriseDetailPage() {
   const navigate = useNavigate();
   const { id } = useParams();
-  const [page, setPage] = useState(1);
 
   /* Données de l'entreprise */
   const { entreprise, isLoading, isError } = useEntreprise(id);
 
-  /* Offres actives de l'entreprise */
-  const {
-    offres,
-    meta,
-    isLoading: offresLoading,
-  } = useOffres(id ? { entreprise_id: id, page, limit: 8 } : {});
-
-  const totalPages = meta?.lastPage ?? 1;
-
-  /* Favoris */
+  /* Auth & Favoris */
   const { isAuthenticated } = useAuthStore();
   const { favoris, mutate: mutateFavoris } = useFavoris(isAuthenticated);
   const favorisOffreIds = new Set(favoris.map((f) => f.offreId || f.offre?.id));
+
+  /* Offres de l'entreprise — on injecte nomEntreprise et logoPath pour JobCard */
+  const offresEntreprise = (entreprise?.offres ?? []).map((o) => ({
+    ...o,
+    entreprise: {
+      ...o.entreprise,
+      nomEntreprise: entreprise.nomEntreprise,
+      logoPath: entreprise.logoPath,
+    },
+  }));
+
+  /* Autres offres (autres entreprises) */
+  const { offres: toutesLesOffres } = useOffres(id ? { limit: 20 } : {});
+
+  const autresOffres = toutesLesOffres
+    .filter((o) => (o.entrepriseId ?? o.entreprise?.id) !== id)
+    .slice(0, 4);
 
   const handleToggleFavori = async (offre) => {
     if (!isAuthenticated) {
@@ -231,57 +239,96 @@ export default function EntrepriseDetailPage() {
               </Card>
             )}
 
-            {/* SECTION: OFFRES ACTIVES */}
+            {/* SECTION: OFFRES DE L'ENTREPRISE */}
             <section>
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-2xl font-bold flex items-center gap-2">
                   <Briefcase className="w-6 h-6 text-primary" />
-                  Offres actives
-                  {meta?.total > 0 && (
+                  Offres de {nom}
+                  {offresEntreprise.length > 0 && (
                     <Badge variant="secondary" className="ml-2 font-semibold">
-                      {meta.total}
+                      {offresEntreprise.length}
                     </Badge>
                   )}
                 </h2>
               </div>
 
-              {offresLoading ? (
+              {offresEntreprise.length > 0 ? (
                 <div className="space-y-4">
-                  {Array.from({ length: 3 }).map((_, i) => (
-                    <div
-                      key={i}
-                      className="h-32 rounded-2xl border border-border bg-muted/10 animate-pulse"
+                  {offresEntreprise.map((offre) => (
+                    <JobCard
+                      key={offre.id}
+                      offre={offre}
+                      isFavori={favorisOffreIds.has(offre.id)}
+                      onToggleFavori={handleToggleFavori}
                     />
                   ))}
                 </div>
-              ) : offres.length === 0 ? (
+              ) : (
                 <EmptyState
                   icon={Briefcase}
                   title="Aucune offre active"
                   description="Cette entreprise n'a pas publié d'offres pour le moment."
                 />
-              ) : (
-                <>
-                  <div className="space-y-4">
-                    {offres.map((offre) => (
-                      <JobCard
-                        key={offre.id}
-                        offre={offre}
-                        isFavori={favorisOffreIds.has(offre.id)}
-                        onToggleFavori={handleToggleFavori}
-                      />
-                    ))}
-                  </div>
-                  <div className="mt-8">
-                    <AppPagination
-                      currentPage={page}
-                      totalPages={totalPages}
-                      onPageChange={(p) => setPage(p)}
-                    />
-                  </div>
-                </>
               )}
             </section>
+
+            {/* SECTION: AUTRES OFFRES (Autres entreprises) */}
+            {autresOffres.length > 0 && (
+              <section className="pt-10 border-t border-border/50">
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-2xl font-bold flex items-center gap-2">
+                    <Tag className="w-6 h-6 text-primary" />
+                    Autres opportunités
+                  </h2>
+                </div>
+
+                <div className="space-y-4">
+                  {autresOffres.map((offre) => (
+                    <JobCard
+                      key={offre.id}
+                      offre={offre}
+                      isFavori={favorisOffreIds.has(offre.id)}
+                      onToggleFavori={handleToggleFavori}
+                    />
+                  ))}
+                </div>
+
+                <div className="mt-8 flex justify-center">
+                  <Button asChild variant="outline" className="rounded-xl px-8">
+                    <Link to="/offres">
+                      Voir toutes les offres
+                      <ArrowRight className="ml-2 h-4 w-4" />
+                    </Link>
+                  </Button>
+                </div>
+              </section>
+            )}
+
+            {!isAuthenticated && (
+              <div className="mt-8 text-center px-6 py-10 bg-primary/5 rounded-3xl border border-primary/10">
+                <h3 className="text-lg font-bold mb-2">
+                  Vous voulez voir plus d'offres ?
+                </h3>
+                <p className="text-muted-foreground mb-6">
+                  Créez un compte gratuitement pour accéder à des milliers
+                  d'opportunités et postuler en un clic.
+                </p>
+                <div className="flex flex-col sm:flex-row justify-center gap-3">
+                  <Button asChild size="lg" className="rounded-xl">
+                    <Link to="/register">S'inscrire gratuitement</Link>
+                  </Button>
+                  <Button
+                    asChild
+                    variant="outline"
+                    size="lg"
+                    className="rounded-xl"
+                  >
+                    <Link to="/login">Se connecter</Link>
+                  </Button>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* COLONNE DROITE (Sidebar Infos) */}
