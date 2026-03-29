@@ -31,7 +31,7 @@ export default function JobOffersSlider() {
   return (
     <section className="py-15 overflow-hidden">
       <div className="container px-4 mx-auto max-w-7x">
-        <div className="text-center mb-16 px-4">
+        <div className="text-center mb-10 px-4">
           <h2 className="text-4xl md:text-5xl font-black text-[#2f327d] mb-4 tracking-tight">
             Dernières offres d'emploi
           </h2>
@@ -60,7 +60,7 @@ export default function JobOffersSlider() {
               768: { slidesPerView: 2 },
               1024: { slidesPerView: 3 },
             }}
-            className="px-4! pb-12!"
+            className="px-4! pb-12! pt-10!"
           >
             {offres.map((offre) => (
               <SwiperSlide key={offre.id} className="h-auto!">

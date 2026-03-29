@@ -82,12 +82,12 @@ export default function JobCard({ offre, isFavori, onToggleFavori }) {
             {/* Ligne 1 : Titre + Favori */}
             <div className="flex items-start justify-between gap-2">
               <div className="min-w-0">
-                <h3 className="font-semibold text-foreground text-[15px] md:text-[18px] leading-snug line-clamp-2 group-hover:text-primary transition-colors">
+                <h3 className="font-semibold text-foreground text-[18px] md:text-[22px] leading-snug line-clamp-2 group-hover:text-primary transition-colors">
                   <Link to={`/offres/${offre.id}`} className="hover:underline">
                     {offre.titre}
                   </Link>
                 </h3>
-                <p className="text-sm text-muted-foreground mt-0.5 truncate block">
+                <p className="text-md font-semibold text-muted-foreground mt-0.5 truncate block">
                   {nomEntreprise}
                 </p>
               </div>
