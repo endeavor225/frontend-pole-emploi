@@ -64,6 +64,7 @@ export const MESSAGES = {
 export const CANDIDATS = {
   BASE: "/candidats",
   DETAIL: (id) => `/candidats/${id}`,
+  UPDATE: (id) => `/candidats/${id}`,
 };
 
 // ========================
@@ -72,6 +73,7 @@ export const CANDIDATS = {
 export const ENTREPRISES = {
   BASE: "/entreprises",
   DETAIL: (id) => `/entreprises/${id}`,
+  UPDATE: (id) => `/entreprises/${id}`,
 };
 
 // ========================
