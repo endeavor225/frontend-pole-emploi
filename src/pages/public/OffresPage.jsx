@@ -8,7 +8,7 @@ import { LoadingSpinner } from "@/components/shared/LoadingSpinner";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { CheckboxGroup } from "@/components/shared/CheckboxGroup";
 import JobCard from "@/components/features/JobCard";
-import { TYPES_OFFRE, SORT_OPTIONS } from "@/lib/constants";
+import { TYPES_OFFRE, SORT_OPTIONS, ROLES } from "@/lib/constants";
 import { toast } from "sonner";
 
 // Composants shadcn
@@ -61,7 +61,7 @@ export default function OffresPage() {
     searchParams.get("localisation") || "",
   );
   const [searchTypeInput, setSearchTypeInput] = useState(() => {
-    const raw = searchParams.get("type_offre");
+    const raw = searchParams.get("typeOffre");
     return raw ? raw.split(",").filter(Boolean) : [];
   });
 
@@ -97,7 +97,7 @@ export default function OffresPage() {
     limit: searchParams.get("limit") || 10,
     search: searchParams.get("search") || "",
     localisation: searchParams.get("localisation") || "",
-    type_offre: searchParams.get("type_offre") || "",
+    typeOffre: searchParams.get("typeOffre") || "",
     ...(selectedDomaines.length > 0 && {
       domaine_id: selectedDomaines.join(","),
     }),
@@ -108,7 +108,10 @@ export default function OffresPage() {
 
   const { offres, meta, isLoading, isValidating } = useOffres(filters);
 
-  const { favoris, mutate: mutateFavoris } = useFavoris(isAuthenticated);
+  const isCandidat = user?.role === ROLES.CANDIDAT;
+  const { favoris, mutate: mutateFavoris } = useFavoris(
+    isAuthenticated && isCandidat,
+  );
 
   const favorisOffreIds = new Set(favoris.map((f) => f.offreId || f.offre?.id));
 
@@ -138,8 +141,8 @@ export default function OffresPage() {
 
     /* Synchronise les types sélectionnées dans l'URL (Select dans la search bar) */
     if (searchTypeInput.length > 0)
-      params.set("type_offre", searchTypeInput.join(","));
-    else params.delete("type_offre");
+      params.set("typeOffre", searchTypeInput.join(","));
+    else params.delete("typeOffre");
 
     params.set("page", "1");
     setSearchParams(params);
@@ -209,6 +212,10 @@ export default function OffresPage() {
       toast.info("Connectez-vous pour ajouter aux favoris");
       return;
     }
+    if (!isCandidat) {
+      toast.info("Seuls les candidats peuvent ajouter aux favoris");
+      return;
+    }
     try {
       const existingFavori = favoris.find(
         (f) => (f.offreId || f.offre?.id) === offre.id,
@@ -250,7 +257,7 @@ export default function OffresPage() {
   const hasActiveFilters =
     filters.search ||
     filters.localisation ||
-    filters.type_offre ||
+    filters.typeOffre ||
     filters.domaine_id ||
     filters.salaire_min ||
     filters.salaire_max;
@@ -526,8 +533,8 @@ export default function OffresPage() {
               )}
               {(() => {
                 // Obtenez les types actifs depuis l'URL (qui ont été appliqués via onSubmit)
-                const activeUrlTypes = filters.type_offre
-                  ? filters.type_offre.split(",")
+                const activeUrlTypes = filters.typeOffre
+                  ? filters.typeOffre.split(",")
                   : [];
 
                 return activeUrlTypes.map((typeVal) => (
@@ -545,8 +552,8 @@ export default function OffresPage() {
                           (v) => v !== typeVal,
                         );
                         if (next.length > 0)
-                          params.set("type_offre", next.join(","));
-                        else params.delete("type_offre");
+                          params.set("typeOffre", next.join(","));
+                        else params.delete("typeOffre");
                         params.set("page", "1");
                         return params;
                       });
