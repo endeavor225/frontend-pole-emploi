@@ -436,7 +436,7 @@ export const offreValidationSchema = Yup.object().shape({
       "Doit être supérieur ou égal au salaire minimum",
     )
     .optional(),
-  type_offre: Yup.string()
+  typeOffre: Yup.string()
     .oneOf(
       ["Emploi", "Stage", "Interim", "Freelance", "Consultance"],
       "Type d'offre invalide",

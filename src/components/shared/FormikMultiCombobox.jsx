@@ -41,47 +41,55 @@ export function FormikMultiCombobox({
   };
 
   return (
-    <Combobox
-      multiple
-      autoHighlight
-      items={items.map((i) => i[labelKey])}
-      value={selectedLabels}
-      onValueChange={handleChange}
-      disabled={disabled}
-    >
-      <ComboboxChips ref={anchor} className="w-full">
-        <ComboboxValue>
-          {(values) => (
-            <>
-              {values.map((value) => (
-                <ComboboxChip key={value}>{value}</ComboboxChip>
-              ))}
-              <ComboboxChipsInput
-                placeholder={placeholder}
-                onBlur={() => formik.setFieldTouched(name, true)}
-                className={`h-10 w-full border-border bg-muted/50 focus-within:ring-primary focus-within:ring-offset-2 transition-all duration-200 ${
-                  formik.touched[name] && formik.errors[name]
-                    ? "border-destructive ring-destructive/20"
-                    : ""
-                }`}
-              />
-            </>
-          )}
-        </ComboboxValue>
-      </ComboboxChips>
+    <>
+      <Combobox
+        multiple
+        autoHighlight
+        items={items.map((i) => i[labelKey])}
+        value={selectedLabels}
+        onValueChange={handleChange}
+        disabled={disabled}
+      >
+        <ComboboxChips
+          ref={anchor}
+          className={`w-full h-11 border-border focus-within:ring-primary focus-within:ring-offset-2 transition-all duration-200 ${
+            formik.touched[name] && formik.errors[name]
+              ? "border-destructive focus-within:ring-destructive"
+              : ""
+          }`}
+        >
+          <ComboboxValue>
+            {(values) => (
+              <>
+                {values.map((value) => (
+                  <ComboboxChip key={value}>{value}</ComboboxChip>
+                ))}
+                <ComboboxChipsInput
+                  placeholder={placeholder}
+                  onBlur={() => formik.setFieldTouched(name, true)}
+                  className="flex-1 text-black"
+                />
+              </>
+            )}
+          </ComboboxValue>
+        </ComboboxChips>
 
-      <ComboboxContent anchor={anchor}>
-        <ComboboxEmpty>Aucun résultat.</ComboboxEmpty>
+        <ComboboxContent anchor={anchor}>
+          <ComboboxEmpty>Aucun résultat.</ComboboxEmpty>
 
-        <ComboboxList>
-          {(label) => (
-            <ComboboxItem key={label} value={label}>
-              {label}
-            </ComboboxItem>
-          )}
-        </ComboboxList>
-      </ComboboxContent>
-    </Combobox>
+          <ComboboxList>
+            {(label) => (
+              <ComboboxItem key={label} value={label}>
+                {label}
+              </ComboboxItem>
+            )}
+          </ComboboxList>
+        </ComboboxContent>
+      </Combobox>
+      {formik.touched[name] && formik.errors[name] && (
+        <p className="text-xs text-destructive mt-1">{formik.errors[name]}</p>
+      )}
+    </>
   );
 }
 

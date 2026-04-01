@@ -103,13 +103,15 @@ export default function OffreDetailPage() {
   const offre = fetchedOffre ?? initialOffre;
 
   const { user, isAuthenticated } = useAuthStore();
-  const { favoris, mutate: mutateFavoris } = useFavoris(isAuthenticated);
+  const isCandidat = user?.role === ROLES.CANDIDAT;
+  const { favoris, mutate: mutateFavoris } = useFavoris(
+    isAuthenticated && isCandidat,
+  );
 
   const [postulerLoading, setPostulerLoading] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
 
   const isFavori = favoris.some((f) => (f.offreId || f.offre?.id) === id);
-  const isCandidat = user?.role === ROLES.CANDIDAT;
 
   const handlePostuler = async () => {
     setPostulerLoading(true);
@@ -129,6 +131,10 @@ export default function OffreDetailPage() {
   const handleToggleFavori = async () => {
     if (!isAuthenticated) {
       toast.info("Connectez-vous pour ajouter aux favoris");
+      return;
+    }
+    if (!isCandidat) {
+      toast.info("Seuls les candidats peuvent ajouter aux favoris");
       return;
     }
     try {
@@ -339,9 +345,10 @@ export default function OffreDetailPage() {
                   <Briefcase className="w-4 h-4 text-primary" />
                   Description du poste
                 </h2>
-                <div className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">
-                  {offre.description}
-                </div>
+                <div
+                  className="text-sm text-muted-foreground leading-relaxed tiptap-content"
+                  dangerouslySetInnerHTML={{ __html: offre.description }}
+                />
               </CardContent>
             </Card>
 

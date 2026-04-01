@@ -25,6 +25,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { formatExternalUrl } from "@/lib/utils";
+import { ROLES } from "@/lib/constants";
 
 /* ── URL base pour les assets statiques ── */
 const API_BASE = (
@@ -68,8 +69,11 @@ export default function EntrepriseDetailPage() {
   const { entreprise, isLoading, isError } = useEntreprise(id);
 
   /* Auth & Favoris */
-  const { isAuthenticated } = useAuthStore();
-  const { favoris, mutate: mutateFavoris } = useFavoris(isAuthenticated);
+  const { isAuthenticated, user } = useAuthStore();
+  const isCandidat = user?.role === ROLES.CANDIDAT;
+  const { favoris, mutate: mutateFavoris } = useFavoris(
+    isAuthenticated && isCandidat,
+  );
   const favorisOffreIds = new Set(favoris.map((f) => f.offreId || f.offre?.id));
 
   /* Offres de l'entreprise — on injecte nomEntreprise et logoPath pour JobCard */
@@ -92,6 +96,10 @@ export default function EntrepriseDetailPage() {
   const handleToggleFavori = async (offre) => {
     if (!isAuthenticated) {
       toast.info("Connectez-vous pour ajouter aux favoris");
+      return;
+    }
+    if (!isCandidat) {
+      toast.info("Seuls les candidats peuvent ajouter aux favoris");
       return;
     }
     try {

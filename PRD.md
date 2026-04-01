@@ -127,7 +127,7 @@ sequenceDiagram
 | Paramètre         | Type   | Description                                    |
 | ----------------- | ------ | ---------------------------------------------- |
 | `page` / `limit`  | number | Pagination                                     |
-| `type_offre`      | enum   | Emploi, Stage, Interim, Freelance, Consultance |
+| `typeOffre`       | enum   | Emploi, Stage, Interim, Freelance, Consultance |
 | `localisation`    | string | Recherche partielle (ILIKE)                    |
 | `search`          | string | Recherche titre + description                  |
 | `domaine_id`      | uuid   | Filtrer par domaine                            |
@@ -148,7 +148,7 @@ sequenceDiagram
 - Seules les offres `active` sont listées
 - L'ownership est vérifié via `OffrePolicy` pour update/delete
 - Relations many-to-many avec `NiveauEtude` et `Domaine` via tables pivot
-- **Création d'Offre (Payload JSON)** : `titre` (2-150 chars), `description`, `experienceMin`, `salaireMin`, `type_offre` (Emploi, Stage, Interim, Freelance, Consultance), `localisation`, `dateLimite`, `niveauxEtudeIds` (array > 0), `domaineIds` (array > 0). `salaireMax` optionnel.
+- **Création d'Offre (Payload JSON)** : `titre` (2-150 chars), `description`, `experienceMin`, `salaireMin`, `typeOffre` (Emploi, Stage, Interim, Freelance, Consultance), `localisation`, `dateLimite`, `niveauxEtudeIds` (array > 0), `domaineIds` (array > 0). `salaireMax` optionnel.
 - **Réponse Offre** : `{ id, titre, description, statut, experienceMin, typeOffre, localisation, entreprise: { id, nomEntreprise, logo }, domaines: [...], niveauxEtude: [...] }`
 
 ---
@@ -309,7 +309,7 @@ erDiagram
 | 5     | `entreprises`           | UUID   | FK → users, domaines                                    |
 | 6     | `niveau_etudes`         | UUID   | Niveaux d'étude                                         |
 | 7     | `candidats`             | UUID   | FK → users, niveau_etudes, domaines                     |
-| 8     | `offres`                | UUID   | FK → entreprises, type_offre enum                       |
+| 8     | `offres`                | UUID   | FK → entreprises, typeOffre enum                        |
 | 9     | `candidatures`          | UUID   | FK → offres, candidats. Unique: (offre_id, candidat_id) |
 | 10    | `favoris`               | UUID\* | FK → candidats, offres. Unique: (candidat_id, offre_id) |
 | 11    | `messages`              | UUID   | FK → users (sender, receiver)                           |
@@ -448,7 +448,7 @@ Exécution : `node ace db:seed`
 
 | Technique                             | Impact                                                            | Priorité |
 | ------------------------------------- | ----------------------------------------------------------------- | -------- |
-| **Index DB** sur colonnes de filtrage | Accélérer les requêtes sur `statut`, `type_offre`, `localisation` | 🟡 Moyen |
+| **Index DB** sur colonnes de filtrage | Accélérer les requêtes sur `statut`, `typeOffre`, `localisation`  | 🟡 Moyen |
 | **Rate limiting**                     | Protéger les endpoints publics (login, register, forgot-password) | 🔴 Haut  |
 | **Cache Redis**                       | Cacher les listes de domaines/niveaux d'étude (changements rares) | 🟡 Moyen |
 | **Soft delete**                       | Ne pas supprimer physiquement (offres, candidatures)              | 🟢 Bas   |

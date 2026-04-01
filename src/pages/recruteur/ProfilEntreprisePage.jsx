@@ -216,7 +216,7 @@ export default function ProfilEntreprisePage() {
                 >
                   <SelectTrigger
                     size="lg"
-                    className={`w-full h-10 border-border focus-visible:ring-primary focus-visible:ring-offset-2 transition-all duration-200 ${
+                    className={`w-full h-11 border-border focus-visible:ring-primary focus-visible:ring-offset-2 transition-all duration-200 ${
                       formik.touched.civilite && formik.errors.civilite
                         ? "border-destructive focus-visible:ring-destructive"
                         : ""
@@ -238,7 +238,7 @@ export default function ProfilEntreprisePage() {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="prenom">
                   Prénom <span className="text-destructive">*</span>
@@ -246,7 +246,7 @@ export default function ProfilEntreprisePage() {
                 <Input
                   id="prenom"
                   {...formik.getFieldProps("prenom")}
-                  className={`h-10 border-border focus-visible:ring-primary focus-visible:ring-offset-2 transition-all duration-200 ${
+                  className={`h-11 border-border focus-visible:ring-primary focus-visible:ring-offset-2 transition-all duration-200 ${
                     formik.touched.prenom && formik.errors.prenom
                       ? "border-destructive focus-visible:ring-destructive"
                       : ""
@@ -266,7 +266,7 @@ export default function ProfilEntreprisePage() {
                 <Input
                   id="nom"
                   {...formik.getFieldProps("nom")}
-                  className={`h-10 border-border focus-visible:ring-primary focus-visible:ring-offset-2 transition-all duration-200 ${
+                  className={`h-11 border-border focus-visible:ring-primary focus-visible:ring-offset-2 transition-all duration-200 ${
                     formik.touched.nom && formik.errors.nom
                       ? "border-destructive focus-visible:ring-destructive"
                       : ""
@@ -297,7 +297,7 @@ export default function ProfilEntreprisePage() {
                   );
                 }}
                 onBlur={formik.handleBlur}
-                className={`h-10 border-border transition-all duration-200 focus-within:ring-primary focus-within:ring-offset-2 ${
+                className={`h-11 border-border transition-all duration-200 focus-within:ring-primary focus-within:ring-offset-2 ${
                   formik.touched.telephone && formik.errors.telephone
                     ? "border-destructive focus-within:ring-destructive"
                     : ""
@@ -327,7 +327,7 @@ export default function ProfilEntreprisePage() {
               <Input
                 id="nomEntreprise"
                 {...formik.getFieldProps("nomEntreprise")}
-                className={`h-10 border-border focus-visible:ring-primary focus-visible:ring-offset-2 transition-all duration-200 ${
+                className={`h-11 border-border focus-visible:ring-primary focus-visible:ring-offset-2 transition-all duration-200 ${
                   formik.touched.nomEntreprise && formik.errors.nomEntreprise
                     ? "border-destructive focus-visible:ring-destructive"
                     : ""
@@ -363,7 +363,7 @@ export default function ProfilEntreprisePage() {
               )}
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="pays">
                   Pays <span className="text-destructive">*</span>
@@ -371,7 +371,7 @@ export default function ProfilEntreprisePage() {
                 <Input
                   id="pays"
                   {...formik.getFieldProps("pays")}
-                  className={`h-10 border-border focus-visible:ring-primary focus-visible:ring-offset-2 transition-all duration-200 ${
+                  className={`h-11 border-border focus-visible:ring-primary focus-visible:ring-offset-2 transition-all duration-200 ${
                     formik.touched.pays && formik.errors.pays
                       ? "border-destructive focus-visible:ring-destructive"
                       : ""
@@ -391,7 +391,7 @@ export default function ProfilEntreprisePage() {
                 <Input
                   id="ville"
                   {...formik.getFieldProps("ville")}
-                  className={`h-10 border-border focus-visible:ring-primary focus-visible:ring-offset-2 transition-all duration-200 ${
+                  className={`h-11 border-border focus-visible:ring-primary focus-visible:ring-offset-2 transition-all duration-200 ${
                     formik.touched.ville && formik.errors.ville
                       ? "border-destructive focus-visible:ring-destructive"
                       : ""
@@ -406,7 +406,7 @@ export default function ProfilEntreprisePage() {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="adresse">
                   Adresse <span className="text-destructive">*</span>
@@ -414,7 +414,7 @@ export default function ProfilEntreprisePage() {
                 <Input
                   id="adresse"
                   {...formik.getFieldProps("adresse")}
-                  className={`h-10 border-border focus-visible:ring-primary focus-visible:ring-offset-2 transition-all duration-200 ${
+                  className={`h-11 border-border focus-visible:ring-primary focus-visible:ring-offset-2 transition-all duration-200 ${
                     formik.touched.adresse && formik.errors.adresse
                       ? "border-destructive focus-visible:ring-destructive"
                       : ""
@@ -434,7 +434,7 @@ export default function ProfilEntreprisePage() {
                 <Input
                   id="codePostal"
                   {...formik.getFieldProps("codePostal")}
-                  className={`h-10 border-border focus-visible:ring-primary focus-visible:ring-offset-2 transition-all duration-200 ${
+                  className={`h-11 border-border focus-visible:ring-primary focus-visible:ring-offset-2 transition-all duration-200 ${
                     formik.touched.codePostal && formik.errors.codePostal
                       ? "border-destructive focus-visible:ring-destructive"
                       : ""
@@ -454,7 +454,7 @@ export default function ProfilEntreprisePage() {
               <Input
                 id="siteWeb"
                 {...formik.getFieldProps("siteWeb")}
-                className={`h-10 border-border focus-visible:ring-primary focus-visible:ring-offset-2 transition-all duration-200 ${
+                className={`h-11 border-border focus-visible:ring-primary focus-visible:ring-offset-2 transition-all duration-200 ${
                   formik.touched.siteWeb && formik.errors.siteWeb
                     ? "border-destructive focus-visible:ring-destructive"
                     : ""
