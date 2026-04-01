@@ -165,6 +165,10 @@ export function RegisterRecruteurForm({ domaines }) {
           if (value !== null && value !== "" && (!Array.isArray(value) || value.length > 0)) {
             if (Array.isArray(value)) {
               value.forEach((v) => formData.append(key, v));
+              // Si c'est domaineIds, on envoie aussi domaine_id (singulier) pour la contrainte DB
+              if (key === "domaineIds" && value.length > 0) {
+                formData.append("domaine_id", value[0]);
+              }
             } else if (key === "siteWeb" && typeof value === "string" && !value.match(/^https?:\/\//)) {
               formData.append(key, `https://${value}`);
             } else {
