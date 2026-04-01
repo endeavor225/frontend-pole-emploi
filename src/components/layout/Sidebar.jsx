@@ -26,7 +26,7 @@ const API_BASE = (
 
 /* ── Liens candidat ── */
 const candidatLinks = [
-  { to: "/candidat/dashboard", icon: Home, label: "Espace candidat" },
+  { to: "/candidat/dashboard", icon: Home, label: "Espace candidat", end: true },
   { to: "/candidat/profil", icon: User, label: "Page Personnelle" },
   { to: "/candidat/candidatures", icon: FileText, label: "Mes candidatures" },
   { to: "/candidat/favoris", icon: Heart, label: "Mes favoris" },
@@ -35,9 +35,9 @@ const candidatLinks = [
 
 /* ── Liens recruteur ── */
 const recruteurLinks = [
-  { to: "/recruteur/dashboard", icon: Home, label: "Espace recruteur" },
+  { to: "/recruteur/dashboard", icon: Home, label: "Espace recruteur", end: true },
   { to: "/recruteur/profil", icon: Building2, label: "Mon entreprise" },
-  { to: "/recruteur/offres", icon: Briefcase, label: "Mes offres" },
+  { to: "/recruteur/offres", icon: Briefcase, label: "Mes offres", end: true },
   {
     to: "/recruteur/offres/nouvelle",
     icon: PlusCircle,
@@ -168,11 +168,11 @@ export function Sidebar() {
       {/* ── Navigation ── */}
       <div className="bg-card border border-border/50 rounded-2xl shadow-sm overflow-hidden">
         <nav className="flex flex-col">
-          {links.map(({ to, icon: Icon, label }, idx) => (
+          {links.map(({ to, icon: Icon, label, end }, idx) => (
             <NavLink
               key={to}
               to={to}
-              end={to.includes("dashboard")}
+              end={end}
               className={({ isActive }) =>
                 cn(
                   "flex items-center gap-3 px-5 py-3 text-sm font-medium transition-colors border-b border-border/30 last:border-b-0",
