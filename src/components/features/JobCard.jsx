@@ -228,9 +228,10 @@ export default function JobCard({ offre, isFavori, onToggleFavori }) {
               />
             </button>
             {expanded && (
-              <p className="mt-2 text-sm text-muted-foreground line-clamp-4 border-t border-border pt-3 whitespace-pre-wrap">
-                {offre.description}
-              </p>
+              <p
+                className="mt-2 text-sm text-muted-foreground line-clamp-4 border-t border-border pt-3 leading-relaxed tiptap-content"
+                dangerouslySetInnerHTML={{ __html: offre.description }}
+              />
             )}
           </>
         )}

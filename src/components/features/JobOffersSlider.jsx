@@ -110,9 +110,12 @@ export default function JobOffersSlider() {
                           {offre.titre}
                         </h3>
 
-                        <p className="text-gray-500 text-sm leading-relaxed line-clamp-4 mb-6 italic">
-                          "{offre.description}"
-                        </p>
+                        <p
+                          className="text-gray-500 text-sm leading-relaxed line-clamp-4 mb-6 italic"
+                          dangerouslySetInnerHTML={{
+                            __html: `${offre.description}`,
+                          }}
+                        ></p>
                       </div>
 
                       {/* Footer */}
