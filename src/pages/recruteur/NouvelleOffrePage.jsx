@@ -1,13 +1,17 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { createOffre } from "@/hooks/useOffres";
 import useSWR from "swr";
 import { fetcher } from "@/api/fetcher";
 import { useFormik } from "formik";
 import * as Yup from "yup";
+import { format } from "date-fns";
+import { fr } from "date-fns/locale";
+import { cn } from "@/lib/utils";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -16,7 +20,15 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2, ArrowLeft } from "lucide-react";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { FormikMultiCombobox } from "@/components/shared/FormikMultiCombobox";
+import { RichTextEditor } from "@/components/shared/RichTextEditor";
+import { Loader2, ArrowLeft, CalendarIcon, Send } from "lucide-react";
 import { TYPES_OFFRE } from "@/lib/constants";
 import { toast } from "sonner";
 
@@ -31,17 +43,18 @@ const offreValidationSchema = Yup.object().shape({
     .required("Expérience minimum requise"),
   salaireMin: Yup.number()
     .min(0, "Ne peut être négatif")
-    .required("Salaire minimum requis"),
+    .nullable()
+    .transform((value) => (isNaN(value) ? null : value)),
   salaireMax: Yup.number()
     .min(
       Yup.ref("salaireMin"),
       "Doit être supérieur ou égal au salaire minimum",
     )
-    .optional()
-    .nullable(),
-  type_offre: Yup.string()
+    .nullable()
+    .transform((value) => (isNaN(value) ? null : value)),
+  typeOffre: Yup.string()
     .oneOf(
-      ["Emploi", "Stage", "Interim", "Freelance", "Consultance"],
+      ["CDI", "CDD", "Stage", "Interim", "Freelance", "Consultance"],
       "Type d'offre invalide",
     )
     .required("Type d'offre obligatoire"),
@@ -50,17 +63,18 @@ const offreValidationSchema = Yup.object().shape({
     .min(new Date(), "La date limite doit être dans le futur")
     .required("Date limite obligatoire"),
   niveauxEtudeIds: Yup.array()
-    .of(Yup.string().uuid())
+    .of(Yup.string().uuid("ID invalide"))
     .min(1, "Sélectionnez au moins un niveau d'étude")
     .required("Requis"),
   domaineIds: Yup.array()
-    .of(Yup.string().uuid())
+    .of(Yup.string().uuid("ID invalide"))
     .min(1, "Sélectionnez au moins un domaine")
     .required("Requis"),
 });
 
 export default function NouvelleOffrePage() {
   const navigate = useNavigate();
+  const [datePopoverOpen, setDatePopoverOpen] = useState(false);
 
   const { data: domainesData } = useSWR("/domaines", fetcher);
   const { data: niveauxData } = useSWR("/niveau-etudes", fetcher);
@@ -72,11 +86,11 @@ export default function NouvelleOffrePage() {
       titre: "",
       description: "",
       experienceMin: 0,
-      salaireMin: 0,
+      salaireMin: "",
       salaireMax: "",
-      type_offre: "",
+      typeOffre: "",
       localisation: "",
-      dateLimite: "",
+      dateLimite: null,
       domaineIds: [],
       niveauxEtudeIds: [],
     },
@@ -84,9 +98,19 @@ export default function NouvelleOffrePage() {
     onSubmit: async (values, { setSubmitting }) => {
       try {
         const payload = { ...values };
-        if (payload.salaireMax === "") {
-          payload.salaireMax = null; // Backend might expect null if empty
+        if (payload.salaireMax === "" || isNaN(payload.salaireMax)) {
+          payload.salaireMax = null;
         }
+        // Formatage de la date en string ISO pour le backend
+        if (payload.dateLimite) {
+          payload.dateLimite = format(payload.dateLimite, "yyyy-MM-dd");
+        }
+
+        // Fix pour domaine_id singulier si nécessaire
+        if (payload.domaineIds?.length > 0) {
+          payload.domaine_id = payload.domaineIds[0];
+        }
+
         await createOffre(payload);
         toast.success("Offre créée avec succès !");
         navigate("/recruteur/offres");
@@ -100,47 +124,36 @@ export default function NouvelleOffrePage() {
     },
   });
 
-  const toggleArrayItem = (field, id) => {
-    const currentList = formik.values[field];
-    if (currentList.includes(id)) {
-      formik.setFieldValue(
-        field,
-        currentList.filter((x) => x !== id),
-      );
-    } else {
-      formik.setFieldValue(field, [...currentList, id]);
-    }
-  };
-
   return (
-    <div className="max-w-2xl">
-      <Button
-        variant="ghost"
-        size="sm"
-        className="mb-8"
-        onClick={() => navigate(-1)}
-      >
-        <ArrowLeft className="mr-2 h-4 w-4" /> Retour
-      </Button>
+    <div className="max-w-4xl mx-auto pb-10">
+      <div className="gap-4 mb-8">
+        <h1 className="text-3xl font-bold tracking-tight ">Nouvelle offre</h1>
+        <p className="text-muted-foreground">
+          Publiez une nouvelle opportunité de recrutement
+        </p>
+      </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-2xl">Nouvelle offre d'emploi</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={formik.handleSubmit} className="space-y-6">
+      <form onSubmit={formik.handleSubmit} className="space-y-6">
+        {/* Section 1 : Détails de l'offre */}
+        <Card className="border-border/50 shadow-sm">
+          <CardHeader>
+            <CardTitle className="text-xl">Informations générales</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
             <div className="space-y-2">
-              <Label htmlFor="titre">Titre de l'offre *</Label>
+              <Label htmlFor="titre">
+                Titre de l'offre <span className="text-destructive">*</span>
+              </Label>
               <Input
                 id="titre"
                 {...formik.getFieldProps("titre")}
-                className={
+                placeholder="Ex: Développeur Full Stack React/Node"
+                className={`h-11 border-border focus-visible:ring-primary focus-visible:ring-offset-2 transition-all duration-200 ${
                   formik.touched.titre && formik.errors.titre
-                    ? "border-destructive"
+                    ? "border-destructive focus-visible:ring-destructive"
                     : ""
-                }
+                }`}
                 disabled={formik.isSubmitting}
-                placeholder="Ex: Développeur Full Stack"
               />
               {formik.touched.titre && formik.errors.titre && (
                 <p className="text-xs text-destructive">
@@ -149,45 +162,30 @@ export default function NouvelleOffrePage() {
               )}
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="description">Description *</Label>
-              <Textarea
-                id="description"
-                {...formik.getFieldProps("description")}
-                className={
-                  formik.touched.description && formik.errors.description
-                    ? "border-destructive"
-                    : ""
-                }
-                disabled={formik.isSubmitting}
-                rows={6}
-                placeholder="Décrivez le poste, les responsabilités, les compétences requises…"
-              />
-              {formik.touched.description && formik.errors.description && (
-                <p className="text-xs text-destructive">
-                  {formik.errors.description}
-                </p>
-              )}
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>Type d'offre *</Label>
+                <Label htmlFor="typeOffre">
+                  Type de contrat <span className="text-destructive">*</span>
+                </Label>
                 <Select
-                  value={formik.values.type_offre}
+                  value={formik.values.typeOffre}
                   onValueChange={(val) =>
-                    formik.setFieldValue("type_offre", val)
+                    formik.setFieldValue("typeOffre", val)
                   }
+                  onOpenChange={(open) => {
+                    if (!open) formik.setFieldTouched("typeOffre", true);
+                  }}
                   disabled={formik.isSubmitting}
                 >
                   <SelectTrigger
-                    className={
-                      formik.touched.type_offre && formik.errors.type_offre
-                        ? "border-destructive"
+                    size="lg"
+                    className={`w-full h-11 border-border focus-visible:ring-primary focus-visible:ring-offset-2 transition-all duration-200 ${
+                      formik.touched.typeOffre && formik.errors.typeOffre
+                        ? "border-destructive focus-visible:ring-destructive"
                         : ""
-                    }
+                    }`}
                   >
-                    <SelectValue placeholder="Sélectionner" />
+                    <SelectValue placeholder="Sélectionner le type" />
                   </SelectTrigger>
                   <SelectContent>
                     {TYPES_OFFRE.map((t) => (
@@ -197,24 +195,27 @@ export default function NouvelleOffrePage() {
                     ))}
                   </SelectContent>
                 </Select>
-                {formik.touched.type_offre && formik.errors.type_offre && (
+                {formik.touched.typeOffre && formik.errors.typeOffre && (
                   <p className="text-xs text-destructive">
-                    {formik.errors.type_offre}
+                    {formik.errors.typeOffre}
                   </p>
                 )}
               </div>
+
               <div className="space-y-2">
-                <Label htmlFor="localisation">Localisation *</Label>
+                <Label htmlFor="localisation">
+                  Localisation <span className="text-destructive">*</span>
+                </Label>
                 <Input
                   id="localisation"
                   {...formik.getFieldProps("localisation")}
-                  className={
+                  placeholder="Ex: Abidjan, Cocody"
+                  className={`h-11 border-border focus-visible:ring-primary focus-visible:ring-offset-2 transition-all duration-200 ${
                     formik.touched.localisation && formik.errors.localisation
-                      ? "border-destructive"
+                      ? "border-destructive focus-visible:ring-destructive"
                       : ""
-                  }
+                  }`}
                   disabled={formik.isSubmitting}
-                  placeholder="Ferkéssédougou"
                 />
                 {formik.touched.localisation && formik.errors.localisation && (
                   <p className="text-xs text-destructive">
@@ -224,21 +225,30 @@ export default function NouvelleOffrePage() {
               </div>
             </div>
 
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="experienceMin">Expérience min * (ans)</Label>
-                <Input
-                  id="experienceMin"
-                  type="number"
-                  min="0"
-                  {...formik.getFieldProps("experienceMin")}
-                  className={
-                    formik.touched.experienceMin && formik.errors.experienceMin
-                      ? "border-destructive"
-                      : ""
-                  }
-                  disabled={formik.isSubmitting}
-                />
+                <Label htmlFor="experienceMin">
+                  Année(s) d'expérience minimum requise{" "}
+                  <span className="text-destructive">*</span>
+                </Label>
+                <div className="relative">
+                  <Input
+                    id="experienceMin"
+                    type="number"
+                    min="0"
+                    {...formik.getFieldProps("experienceMin")}
+                    className={`h-11 border-border focus-visible:ring-primary focus-visible:ring-offset-2 transition-all duration-200 ${
+                      formik.touched.experienceMin &&
+                      formik.errors.experienceMin
+                        ? "border-destructive focus-visible:ring-destructive"
+                        : ""
+                    }`}
+                    disabled={formik.isSubmitting}
+                  />
+                  <span className="absolute right-7 top-1/2 -translate-y-1/2 text-sm text-muted-foreground font-medium">
+                    An(s)
+                  </span>
+                </div>
                 {formik.touched.experienceMin &&
                   formik.errors.experienceMin && (
                     <p className="text-xs text-destructive">
@@ -246,41 +256,182 @@ export default function NouvelleOffrePage() {
                     </p>
                   )}
               </div>
+
+              <div className="space-y-2 ">
+                <Label htmlFor="dateLimite">
+                  Date limite de candidature{" "}
+                  <span className="text-destructive">*</span>
+                </Label>
+                <Popover
+                  open={datePopoverOpen}
+                  onOpenChange={(open) => {
+                    setDatePopoverOpen(open);
+                    if (!open) formik.setFieldTouched("dateLimite", true);
+                  }}
+                >
+                  <PopoverTrigger asChild>
+                    <Button
+                      id="dateLimite"
+                      variant={"outline"}
+                      className={cn(
+                        "w-full justify-start text-left font-normal h-11 border-border focus-visible:ring-primary focus-visible:ring-offset-2 transition-all duration-200",
+                        !formik.values.dateLimite && "text-muted-foreground",
+                        formik.touched.dateLimite &&
+                          formik.errors.dateLimite &&
+                          "border-destructive focus-visible:ring-destructive",
+                      )}
+                      disabled={formik.isSubmitting}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {formik.values.dateLimite ? (
+                        format(formik.values.dateLimite, "PPP", { locale: fr })
+                      ) : (
+                        <span>Sélectionner une date</span>
+                      )}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={formik.values.dateLimite}
+                      defaultMonth={formik.values.dateLimite || new Date()}
+                      captionLayout="dropdown"
+                      fromYear={new Date().getFullYear()}
+                      toYear={new Date().getFullYear() + 2}
+                      onSelect={(date) => {
+                        formik.setFieldValue("dateLimite", date);
+                        setTimeout(
+                          () => formik.setFieldTouched("dateLimite", true),
+                          100,
+                        );
+                        setDatePopoverOpen(false);
+                      }}
+                      disabled={(date) => date < new Date()}
+                      initialFocus
+                      locale={fr}
+                    />
+                  </PopoverContent>
+                </Popover>
+                {formik.touched.dateLimite && formik.errors.dateLimite && (
+                  <p className="text-xs text-destructive">
+                    {formik.errors.dateLimite}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="description">
+                Description du poste <span className="text-destructive">*</span>
+              </Label>
+              <RichTextEditor
+                id="description"
+                value={formik.values.description}
+                onChange={(content) =>
+                  formik.setFieldValue("description", content)
+                }
+                onBlur={() => formik.setFieldTouched("description", true)}
+                placeholder="Missions, compétences techniques, avantages, environnement de travail…"
+                error={formik.touched.description && formik.errors.description}
+              />
+              {formik.touched.description && formik.errors.description && (
+                <p className="text-xs text-destructive">
+                  {formik.errors.description}
+                </p>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Section 2 : Exigences et Domaines */}
+        <Card className="border-border/50 shadow-sm">
+          <CardHeader>
+            <CardTitle className="text-xl">Critères de sélection</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="space-y-2">
+              <Label>
+                Domaines d'activité <span className="text-destructive">*</span>
+              </Label>
+              <FormikMultiCombobox
+                formik={formik}
+                name="domaineIds"
+                items={domaines}
+                labelKey="libelle"
+                valueKey="id"
+                placeholder="Sélectionner un ou plusieurs domaines"
+                disabled={formik.isSubmitting}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label>
+                Niveaux d'étude requis{" "}
+                <span className="text-destructive">*</span>
+              </Label>
+              <FormikMultiCombobox
+                formik={formik}
+                name="niveauxEtudeIds"
+                items={niveaux}
+                labelKey="libelle"
+                valueKey="id"
+                placeholder="Sélectionner un ou plusieurs niveaux"
+                disabled={formik.isSubmitting}
+              />
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Section 3 : Rémunération et Limite */}
+        <Card className="border-border/50 shadow-sm">
+          <CardHeader>
+            <CardTitle className="text-xl">Rémunération et Délai</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="salaireMin">Salaire minimum *</Label>
-                <Input
-                  id="salaireMin"
-                  type="number"
-                  min="0"
-                  {...formik.getFieldProps("salaireMin")}
-                  className={
-                    formik.touched.salaireMin && formik.errors.salaireMin
-                      ? "border-destructive"
-                      : ""
-                  }
-                  disabled={formik.isSubmitting}
-                  placeholder="ex: 150000"
-                />
+                <Label htmlFor="salaireMin">Salaire minimum</Label>
+                <div className="relative">
+                  <Input
+                    id="salaireMin"
+                    type="number"
+                    {...formik.getFieldProps("salaireMin")}
+                    className={`h-11 pl-4 border-border focus-visible:ring-primary focus-visible:ring-offset-2 transition-all duration-200 ${
+                      formik.touched.salaireMin && formik.errors.salaireMin
+                        ? "border-destructive focus-visible:ring-destructive"
+                        : ""
+                    }`}
+                    disabled={formik.isSubmitting}
+                  />
+                  <span className="absolute right-8 top-1/2 -translate-y-1/2 text-sm text-muted-foreground font-medium">
+                    FCFA
+                  </span>
+                </div>
                 {formik.touched.salaireMin && formik.errors.salaireMin && (
                   <p className="text-xs text-destructive">
                     {formik.errors.salaireMin}
                   </p>
                 )}
               </div>
+
               <div className="space-y-2">
                 <Label htmlFor="salaireMax">Salaire maximum</Label>
-                <Input
-                  id="salaireMax"
-                  type="number"
-                  min="0"
-                  {...formik.getFieldProps("salaireMax")}
-                  className={
-                    formik.touched.salaireMax && formik.errors.salaireMax
-                      ? "border-destructive"
-                      : ""
-                  }
-                  disabled={formik.isSubmitting}
-                />
+                <div className="relative">
+                  <Input
+                    id="salaireMax"
+                    type="number"
+                    {...formik.getFieldProps("salaireMax")}
+                    className={`h-11 pl-4 border-border focus-visible:ring-primary focus-visible:ring-offset-2 transition-all duration-200 ${
+                      formik.touched.salaireMax && formik.errors.salaireMax
+                        ? "border-destructive focus-visible:ring-destructive"
+                        : ""
+                    }`}
+                    disabled={formik.isSubmitting}
+                  />
+                  <span className="absolute right-8 top-1/2 -translate-y-1/2 text-sm text-muted-foreground font-medium">
+                    FCFA
+                  </span>
+                </div>
                 {formik.touched.salaireMax && formik.errors.salaireMax && (
                   <p className="text-xs text-destructive">
                     {formik.errors.salaireMax}
@@ -288,111 +439,38 @@ export default function NouvelleOffrePage() {
                 )}
               </div>
             </div>
+          </CardContent>
+        </Card>
 
-            <div className="space-y-2">
-              <Label htmlFor="dateLimite">Date limite *</Label>
-              <Input
-                id="dateLimite"
-                type="date"
-                {...formik.getFieldProps("dateLimite")}
-                className={
-                  formik.touched.dateLimite && formik.errors.dateLimite
-                    ? "border-destructive"
-                    : ""
-                }
-                disabled={formik.isSubmitting}
-              />
-              {formik.touched.dateLimite && formik.errors.dateLimite && (
-                <p className="text-xs text-destructive">
-                  {formik.errors.dateLimite}
-                </p>
-              )}
-            </div>
-
-            {/* Multi-select Domaines */}
-            <div className="space-y-2">
-              <Label>Domaines d'activité *</Label>
-              <div className="flex flex-wrap gap-2 rounded-lg border p-3 max-h-40 overflow-y-auto">
-                {domaines.map((d) => (
-                  <button
-                    key={d.id}
-                    type="button"
-                    onClick={() => toggleArrayItem("domaineIds", d.id)}
-                    className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
-                      formik.values.domaineIds.includes(d.id)
-                        ? "bg-primary text-primary-foreground"
-                        : "bg-muted text-muted-foreground hover:bg-muted/80"
-                    }`}
-                  >
-                    {d.libelle}
-                  </button>
-                ))}
-              </div>
-              {formik.values.domaineIds.length > 0 && (
-                <p className="text-xs text-muted-foreground">
-                  {formik.values.domaineIds.length} sélectionné(s)
-                </p>
-              )}
-              {formik.touched.domaineIds && formik.errors.domaineIds && (
-                <p className="text-xs text-destructive">
-                  {formik.errors.domaineIds}
-                </p>
-              )}
-            </div>
-
-            {/* Multi-select Niveaux */}
-            <div className="space-y-2">
-              <Label>Niveaux d'étude requis *</Label>
-              <div className="flex flex-wrap gap-2 rounded-lg border p-3 max-h-40 overflow-y-auto">
-                {niveaux.map((n) => (
-                  <button
-                    key={n.id}
-                    type="button"
-                    onClick={() => toggleArrayItem("niveauxEtudeIds", n.id)}
-                    className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
-                      formik.values.niveauxEtudeIds.includes(n.id)
-                        ? "bg-primary text-primary-foreground"
-                        : "bg-muted text-muted-foreground hover:bg-muted/80"
-                    }`}
-                  >
-                    {n.libelle}
-                  </button>
-                ))}
-              </div>
-              {formik.touched.niveauxEtudeIds &&
-                formik.errors.niveauxEtudeIds && (
-                  <p className="text-xs text-destructive">
-                    {formik.errors.niveauxEtudeIds}
-                  </p>
-                )}
-            </div>
-
-            <div className="flex gap-3 pt-4">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => navigate(-1)}
-                disabled={formik.isSubmitting}
-              >
-                Annuler
-              </Button>
-              <Button
-                type="submit"
-                disabled={formik.isSubmitting}
-                className="flex-1"
-              >
-                {formik.isSubmitting ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Création…
-                  </>
-                ) : (
-                  "Publier l'offre"
-                )}
-              </Button>
-            </div>
-          </form>
-        </CardContent>
-      </Card>
+        <div className="flex items-center gap-4 pt-4">
+          <Button
+            type="button"
+            variant="outline"
+            size="lg"
+            className="h-12 px-8 flex-1 sm:flex-none border-border hover:bg-destructive"
+            onClick={() => navigate(-1)}
+            disabled={formik.isSubmitting}
+          >
+            Annuler
+          </Button>
+          <Button
+            type="submit"
+            size="lg"
+            className="h-12 px-8 flex-1 sm:flex-none bg-primary hover:bg-primary/90 shadow-md shadow-primary/20"
+            disabled={formik.isSubmitting}
+          >
+            {formik.isSubmitting ? (
+              <>
+                <Loader2 className="mr-2 h-5 w-5 animate-spin" /> Publication...
+              </>
+            ) : (
+              <>
+                <Send className="mr-2 h-4 w-4" /> Publier l'offre
+              </>
+            )}
+          </Button>
+        </div>
+      </form>
     </div>
   );
 }
