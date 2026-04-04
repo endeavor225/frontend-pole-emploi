@@ -43,6 +43,8 @@ export default function CompanyMarquee() {
     limit: 30,
   });
 
+  if (!entreprises || entreprises.length === 0) return null;
+
   return (
     <motion.div
       initial="hidden"
