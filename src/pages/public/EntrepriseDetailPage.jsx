@@ -87,7 +87,9 @@ export default function EntrepriseDetailPage() {
   }));
 
   /* Autres offres (autres entreprises) */
-  const { offres: toutesLesOffres } = useOffres(id ? { limit: 20 } : {});
+  const { offres: toutesLesOffres } = useOffres(
+    id ? { limit: 20 } : { limit: 20, all: true },
+  );
 
   const autresOffres = toutesLesOffres
     .filter((o) => (o.entrepriseId ?? o.entreprise?.id) !== id)
