@@ -1675,13 +1675,6 @@
     "@tailwindcss/oxide-win32-arm64-msvc" "4.2.0"
     "@tailwindcss/oxide-win32-x64-msvc" "4.2.0"
 
-"@tailwindcss/typography@^0.5.19":
-  version "0.5.19"
-  resolved "https://registry.yarnpkg.com/@tailwindcss/typography/-/typography-0.5.19.tgz#ecb734af2569681eb40932f09f60c2848b909456"
-  integrity sha512-w31dd8HOx3k9vPtcQh5QHP9GwKcgbMp87j58qi6xgiBnFFtKEAgCWnDw4qUT8aHwkCp8bKvb/KGKWWHedP0AAg==
-  dependencies:
-    postcss-selector-parser "6.0.10"
-
 "@tailwindcss/vite@^4.2.0":
   version "4.2.0"
   resolved "https://registry.npmjs.org/@tailwindcss/vite/-/vite-4.2.0.tgz"
@@ -4038,14 +4031,6 @@ pkce-challenge@^5.0.0:
   resolved "https://registry.npmjs.org/pkce-challenge/-/pkce-challenge-5.0.1.tgz"
   integrity sha512-wQ0b/W4Fr01qtpHlqSqspcj3EhBvimsdh0KlHhH8HRZnMsEa0ea2fTULOXOS9ccQr3om+GcGRk4e+isrZWV8qQ==
 
-postcss-selector-parser@6.0.10:
-  version "6.0.10"
-  resolved "https://registry.yarnpkg.com/postcss-selector-parser/-/postcss-selector-parser-6.0.10.tgz#79b61e2c0d1bfc2602d549e11d0876256f8df88d"
-  integrity sha512-IQ7TZdoaqbT+LCpShg46jnZVlhWD2w6iQYAcYXfHARZ7X1t/UGhhceQDs5X0cGqKvYlHNOuv7Oa1xmb0oQuA3w==
-  dependencies:
-    cssesc "^3.0.0"
-    util-deprecate "^1.0.2"
-
 postcss-selector-parser@^7.1.0:
   version "7.1.1"
   resolved "https://registry.npmjs.org/postcss-selector-parser/-/postcss-selector-parser-7.1.1.tgz"
@@ -4293,7 +4278,7 @@ queue-microtask@^1.2.2:
 
 radix-ui@^1.4.3:
   version "1.4.3"
-  resolved "https://registry.npmjs.org/radix-ui/-/radix-ui-1.4.3.tgz"
+  resolved "https://registry.yarnpkg.com/radix-ui/-/radix-ui-1.4.3.tgz#17712d9e26ee61fdf4cd3969f4e16a794419508b"
   integrity sha512-aWizCQiyeAenIdUbqEpXgRA1ya65P13NKn/W8rWkcN0OPkRDxdBVLWnIEDsS2RpwCK2nobI7oMUSmexzTDyAmA==
   dependencies:
     "@radix-ui/primitive" "1.1.3"

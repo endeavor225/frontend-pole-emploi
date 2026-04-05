@@ -12,7 +12,7 @@ export default function DashboardPage() {
   const { unreadCount } = useNotifications();
 
   const totalCandidatures = offres.reduce(
-    (acc, o) => acc + (o.candidaturesCount || 0),
+    (acc, o) => acc + (o.candidatures?.length || o.candidaturesCount || 0),
     0,
   );
 

@@ -14,9 +14,32 @@ import { Pagination, Autoplay, FreeMode } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/pagination";
 import "swiper/css/free-mode";
+import { TYPE_OFFRE_COLORS } from "@/lib/constants";
+
+/* ── Badge coloré selon le type d'offre ─────────────────── */
+function TypeOfreBadge({ type }) {
+  const colors = TYPE_OFFRE_COLORS[type] ?? {
+    bg: "#F3F4F6",
+    text: "#374151",
+    border: "#E5E7EB",
+  };
+  return (
+    <span
+      className="inline-flex gap-2 items-center capitalize font-semibold text-[12px] px-4 py-1 rounded-full border"
+      style={{
+        backgroundColor: colors.bg,
+        color: colors.text,
+        borderColor: colors.border,
+      }}
+    >
+      <Briefcase className="size-3" />
+      {type}
+    </span>
+  );
+}
 
 export default function JobOffersSlider() {
-  const { offres, isLoading } = useOffres({ limit: 10 });
+  const { offres, isLoading } = useOffres({ limit: 10, all: true });
 
   if (isLoading) {
     return (
@@ -120,15 +143,14 @@ export default function JobOffersSlider() {
 
                       {/* Footer */}
                       <div className="mt-auto pt-6 border-t border-gray-50 flex items-center justify-center gap-3">
-                        <div className="flex items-center gap-2 bg-primary/10 px-4 py-2 rounded-full text-primary font-bold text-[10px] uppercase tracking-wider transition-all duration-300 hover:bg-primary/20">
+                        <div className="flex items-center gap-2 bg-primary/10 px-4 py-1 rounded-full text-primary font-semibold text-[12px] capitalize tracking-wider transition-all duration-300 hover:bg-primary/20">
                           <MapPin className="size-3" />
                           <span>{offre?.localisation || "Abidjan"}</span>
                         </div>
 
-                        <div className="flex items-center gap-2 bg-secondary/10 px-4 py-2 rounded-full text-secondary font-bold text-[10px] uppercase tracking-wider transition-all duration-300 hover:bg-secondary/20">
-                          <Briefcase className="size-3" />
-                          <span>{offre?.typeOffre}</span>
-                        </div>
+                        {offre.typeOffre && (
+                          <TypeOfreBadge type={offre.typeOffre} />
+                        )}
                       </div>
                     </div>
                   </Link>

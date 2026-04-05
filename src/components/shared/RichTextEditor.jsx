@@ -128,7 +128,7 @@ export function RichTextEditor({
   return (
     <div
       className={cn(
-        "flex flex-col w-full rounded-lg border border-input bg-background transition-all focus-within:ring-2 focus-within:ring-primary/20 overflow-hidden shadow-sm",
+        "flex flex-col w-full rounded-lg border border-input bg-background transition-all focus-within:ring-primary focus-within:ring-2 overflow-hidden shadow-sm",
         error && "border-destructive focus-within:ring-destructive",
         className,
       )}
