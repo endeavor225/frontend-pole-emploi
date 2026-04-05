@@ -17,22 +17,17 @@ import {
 } from "@/components/ui/dialog";
 import {
   PlusCircle,
-  Pencil,
-  Trash2,
   Users,
   Briefcase,
   Loader2,
   Search,
-  MapPin,
-  Clock,
-  BarChart3,
   CheckCircle2,
   AlertCircle,
-  ChevronRight,
-  Eye,
+  Trash2,
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import RecruiterJobCard from "@/components/features/RecruiterJobCard";
 
 /* ── Composant Stat Card ── */
 function StatCard({ title, value, icon: Icon, colorClass }) {
@@ -58,7 +53,8 @@ function StatCard({ title, value, icon: Icon, colorClass }) {
 }
 
 export default function MesOffresPage() {
-  const { offres, isLoading, mutate } = useOffres();
+  const { offres, isLoading, mutate } = useOffres({ candidatures: true });
+  console.log("🚀 ~ MesOffresPage ~ offres:", JSON.stringify(offres, null, 2));
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [deleting, setDeleting] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -67,7 +63,8 @@ export default function MesOffresPage() {
   const stats = useMemo(() => {
     const total = offres.length;
     const totalCandidatures = offres.reduce(
-      (acc, curr) => acc + (curr.candidaturesCount || 0),
+      (acc, curr) =>
+        acc + (curr.candidatures?.length || curr.candidaturesCount || 0),
       0,
     );
     // On considère "active" si pas de date limite ou date limite > aujourd'hui
@@ -178,111 +175,13 @@ export default function MesOffresPage() {
         />
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {filteredOffres.map((offre) => {
-            const isActive =
-              !offre.dateLimite || new Date(offre.dateLimite) > new Date();
-
-            return (
-              <Card
-                key={offre.id}
-                className="group hover:ring-2 hover:ring-primary/20 transition-all duration-300 border-none shadow-sm flex flex-col"
-              >
-                <CardContent className="p-6 flex flex-col flex-1">
-                  <div className="flex justify-between items-start mb-4">
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2">
-                        {isActive ? (
-                          <Badge className="bg-emerald-500/10 text-emerald-600 border-emerald-500/20 text-[10px] uppercase font-bold tracking-wider">
-                            Actif
-                          </Badge>
-                        ) : (
-                          <Badge className="bg-red-500/10 text-red-600 border-red-500/20 text-[10px] uppercase font-bold tracking-wider">
-                            Expiré
-                          </Badge>
-                        )}
-                        {offre.typeOffre && (
-                          <Badge
-                            variant="outline"
-                            className="text-[10px] uppercase font-bold tracking-wider"
-                          >
-                            {offre.typeOffre}
-                          </Badge>
-                        )}
-                      </div>
-                      <h4 className="font-bold text-lg leading-tight group-hover:text-primary transition-colors line-clamp-2">
-                        {offre.titre}
-                      </h4>
-                    </div>
-                  </div>
-
-                  <div className="space-y-3 mb-6 text-sm text-muted-foreground">
-                    <div className="flex items-center gap-2">
-                      <MapPin className="w-4 h-4 text-primary/60" />
-                      {offre.localisation || "Localisation non précisée"}
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Clock className="w-4 h-4 text-primary/60" />
-                      Publié le {new Date(offre.createdAt).toLocaleDateString()}
-                    </div>
-                    <div className="flex items-center gap-2 bg-primary/5 p-2 rounded-lg border border-primary/10">
-                      <Users className="w-4 h-4 text-primary" />
-                      <span className="font-semibold text-primary">
-                        {offre.candidaturesCount || 0}
-                      </span>
-                      <span className="text-xs">candidatures</span>
-                    </div>
-                  </div>
-
-                  <div className="mt-auto pt-6 border-t border-muted flex items-center justify-between">
-                    <div className="flex items-center gap-1">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 text-muted-foreground hover:text-primary hover:bg-primary/5"
-                        asChild
-                        title="Aperçu"
-                      >
-                        <Link to={`/offres/${offre.id}`}>
-                          <Eye className="w-4 h-4" />
-                        </Link>
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 text-muted-foreground hover:text-primary hover:bg-primary/5"
-                        asChild
-                        title="Candidatures"
-                      >
-                        <Link to={`/recruteur/offres/${offre.id}/candidatures`}>
-                          <Users className="w-4 h-4" />
-                        </Link>
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 text-muted-foreground hover:text-primary hover:bg-primary/5"
-                        asChild
-                        title="Modifier"
-                      >
-                        <Link to={`/recruteur/offres/${offre.id}/modifier`}>
-                          <Pencil className="w-4 h-4" />
-                        </Link>
-                      </Button>
-                    </div>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/5"
-                      onClick={() => setDeleteTarget(offre)}
-                      title="Supprimer"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            );
-          })}
+          {filteredOffres.map((offre) => (
+            <RecruiterJobCard
+              key={offre.id}
+              offre={offre}
+              onDelete={setDeleteTarget}
+            />
+          ))}
         </div>
       )}
 
