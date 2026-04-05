@@ -3,6 +3,7 @@ import { SWRConfig } from "swr";
 import { Toaster } from "@/components/ui/sonner";
 import { router } from "@/router";
 import { fetcher } from "@/api/fetcher";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 function App() {
   return (
@@ -17,8 +18,10 @@ function App() {
         shouldRetryOnError: true,
       }}
     >
-      <RouterProvider router={router} />
-      <Toaster richColors position="top-right" />
+      <TooltipProvider>
+        <RouterProvider router={router} />
+        <Toaster richColors position="top-right" />
+      </TooltipProvider>
     </SWRConfig>
   );
 }
