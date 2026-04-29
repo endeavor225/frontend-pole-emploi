@@ -3,7 +3,7 @@ import { fetcher } from "@/api/fetcher";
 import api from "@/api/axios";
 import { NOTIFICATIONS } from "@/api/endpoints";
 
-export function useNotifications(enabled = false) {
+export function useNotifications(enabled = true) {
   const { data, error, isLoading, mutate } = useSWR(
     enabled ? NOTIFICATIONS.BASE : null, // null = pas de fetch
     fetcher,
@@ -19,11 +19,11 @@ export function useNotifications(enabled = false) {
 }
 
 export async function markAsRead(id) {
-  const { data } = await api.put(NOTIFICATIONS.MARK_READ(id));
+  const { data } = await api.patch(NOTIFICATIONS.READ(id));
   return data;
 }
 
 export async function markAllAsRead() {
-  const { data } = await api.put(NOTIFICATIONS.MARK_ALL_READ);
+  const { data } = await api.patch(NOTIFICATIONS.READ_ALL);
   return data;
 }

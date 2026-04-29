@@ -39,7 +39,7 @@ export async function postuler(offreId) {
 }
 
 export async function updateStatutCandidature(id, statut) {
-  const { data } = await api.put(CANDIDATURES.DETAIL(id), { statut });
+  const { data } = await api.put(CANDIDATURES.UPDATE(id), { statut });
   return data;
 }
 

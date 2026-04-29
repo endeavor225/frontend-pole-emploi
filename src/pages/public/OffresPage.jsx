@@ -309,9 +309,9 @@ export default function OffresPage() {
           {/* Domaines */}
           <div>
             <p className="text-sm font-semibold text-foreground mb-2">
-              Domaines
+              Domaines de compétences
             </p>
-            <div className="space-y-2.5 max-h-150 overflow-y-auto pr-1">
+            <div className="space-y-2.5 max-h-708 overflow-y-auto pr-1">
               {domaines.map((dom) => (
                 <div key={dom.id} className="flex items-center gap-2">
                   <Checkbox
@@ -334,7 +334,7 @@ export default function OffresPage() {
           <div className="border-t border-border" />
 
           {/* Salary range */}
-          <div>
+          {/* <div>
             <p className="text-sm font-semibold text-foreground mb-4">
               Fourchette de salaire
             </p>
@@ -354,7 +354,7 @@ export default function OffresPage() {
             <p className="text-center text-sm font-semibold text-primary mt-1">
               {fmtSal(salRange[0])} – {fmtSal(salRange[1])} FCFA
             </p>
-          </div>
+          </div> */}
         </CardContent>
       </Card>
     </div>

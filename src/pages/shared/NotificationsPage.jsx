@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom";
 import {
   useNotifications,
   markAsRead,
@@ -33,14 +34,20 @@ const typeIcon = (type) => {
 };
 
 export default function NotificationsPage() {
+  const navigate = useNavigate();
   const { notifications, unreadCount, isLoading, mutate } = useNotifications();
 
-  const handleMarkRead = async (id) => {
-    try {
-      await markAsRead(id);
-      mutate();
-    } catch {
-      toast.error("Erreur");
+  const handleNotificationClick = async (n) => {
+    if (!n.lu) {
+      try {
+        await markAsRead(n.id);
+        mutate();
+      } catch (error) {
+        console.error("Erreur lors du marquage comme lu:", error);
+      }
+    }
+    if (n.lien) {
+      navigate(n.lien);
     }
   };
 
@@ -88,10 +95,10 @@ export default function NotificationsPage() {
               <Card
                 key={n.id}
                 className={cn(
-                  "cursor-pointer transition-colors hover:bg-accent",
+                  "cursor-pointer transition-colors hover:bg-accent/30",
                   !n.lu && "border-primary/30 bg-primary/5",
                 )}
-                onClick={() => !n.lu && handleMarkRead(n.id)}
+                onClick={() => handleNotificationClick(n)}
               >
                 <CardContent className="py-4">
                   <div className="flex items-start gap-4">
@@ -106,9 +113,18 @@ export default function NotificationsPage() {
                       <Icon className="h-4 w-4" />
                     </div>
                     <div className="flex-1 space-y-1">
-                      <p className={cn("text-sm", !n.lu && "font-semibold")}>
-                        {n.message || n.titre || "Notification"}
-                      </p>
+                      <div className="flex items-center gap-2">
+                        <p className={cn("text-sm", !n.lu && "font-semibold")}>
+                          {n.titre || "Notification"}
+                        </p>
+                      </div>
+
+                      {n.contenu && (
+                        <p className="text-sm text-muted-foreground line-clamp-2">
+                          {n.contenu}
+                        </p>
+                      )}
+
                       <p className="text-xs text-muted-foreground">
                         {new Date(n.createdAt).toLocaleDateString("fr-FR", {
                           day: "numeric",
