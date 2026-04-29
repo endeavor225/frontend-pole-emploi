@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -8,6 +9,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -36,8 +45,21 @@ export default function CandidateCard({
   isUpdating = false,
   apiBase = "",
 }) {
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [pendingStatus, setPendingStatus] = useState(null);
+
   const c = candidature;
   const candidat = c.candidat || c.user || {};
+
+  const handleStatusSelect = (v) => {
+    setPendingStatus(v);
+    setShowConfirm(true);
+  };
+
+  const confirmStatusChange = () => {
+    onStatusChange(c.id, pendingStatus);
+    setShowConfirm(false);
+  };
 
   const getInitials = (user) => {
     if (!user) return "?";
@@ -159,7 +181,7 @@ export default function CandidateCard({
             <div className="relative flex items-center gap-2 flex-1 lg:flex-none">
               <Select
                 value={c.statut}
-                onValueChange={(v) => onStatusChange(c.id, v)}
+                onValueChange={handleStatusSelect}
                 disabled={isUpdating}
               >
                 <SelectTrigger
@@ -202,6 +224,31 @@ export default function CandidateCard({
             </Button>
           </div>
         </div>
+
+        {/* Dialog de confirmation */}
+        <Dialog open={showConfirm} onOpenChange={setShowConfirm}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Confirmer le changement</DialogTitle>
+              <DialogDescription>
+                Voulez-vous vraiment passer le statut de cette candidature à :{" "}
+                <span className="font-bold text-foreground">
+                  {
+                    STATUTS_CANDIDATURE.find((s) => s.value === pendingStatus)
+                      ?.label
+                  }
+                </span>
+                ?
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter className="gap-2 sm:gap-1">
+              <Button variant="outline" onClick={() => setShowConfirm(false)}>
+                Annuler
+              </Button>
+              <Button onClick={confirmStatusChange}>Confirmer</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </CardContent>
     </Card>
   );

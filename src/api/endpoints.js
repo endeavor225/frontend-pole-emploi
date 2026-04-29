@@ -28,6 +28,7 @@ export const OFFRES = {
 export const CANDIDATURES = {
   BASE: "/candidatures",
   DETAIL: (id) => `/candidatures/${id}`,
+  UPDATE: (id) => `/candidatures/${id}`,
 };
 
 // ========================
