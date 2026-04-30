@@ -21,12 +21,8 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { STATUTS_CANDIDATURE, STATUT_CANDIDATURE } from "@/lib/constants";
-import { cn } from "@/lib/utils";
+import { API_BASE, cn } from "@/lib/utils";
 import CandidateCard from "@/components/features/CandidateCard";
-
-const API_BASE = (
-  import.meta.env.VITE_API_URL || "http://localhost:3333/api"
-).replace(/\/api$/, "");
 
 /* ── Composant Stat Card ── */
 function SummaryCard({ label, value, icon: Icon, colorClass }) {

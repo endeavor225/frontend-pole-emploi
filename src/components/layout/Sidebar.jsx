@@ -13,20 +13,21 @@ import {
   Pencil,
 } from "lucide-react";
 import { useAuthStore } from "@/store/authStore";
-import { cn } from "@/lib/utils";
+import { API_BASE, cn } from "@/lib/utils";
 import { ROLES } from "@/lib/constants";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import api from "@/api/axios";
 import { AUTH } from "@/api/endpoints";
 import { toast } from "sonner";
 
-const API_BASE = (
-  import.meta.env.VITE_API_URL || "http://localhost:3333/api"
-).replace(/\/api$/, "");
-
 /* ── Liens candidat ── */
 const candidatLinks = [
-  { to: "/candidat/dashboard", icon: Home, label: "Espace candidat", end: true },
+  {
+    to: "/candidat/dashboard",
+    icon: Home,
+    label: "Espace candidat",
+    end: true,
+  },
   { to: "/candidat/profil", icon: User, label: "Page Personnelle" },
   { to: "/candidat/candidatures", icon: FileText, label: "Mes candidatures" },
   { to: "/candidat/favoris", icon: Heart, label: "Mes favoris" },
@@ -35,7 +36,12 @@ const candidatLinks = [
 
 /* ── Liens recruteur ── */
 const recruteurLinks = [
-  { to: "/recruteur/dashboard", icon: Home, label: "Espace recruteur", end: true },
+  {
+    to: "/recruteur/dashboard",
+    icon: Home,
+    label: "Espace recruteur",
+    end: true,
+  },
   { to: "/recruteur/profil", icon: Building2, label: "Mon entreprise" },
   { to: "/recruteur/offres", icon: Briefcase, label: "Mes offres", end: true },
   {

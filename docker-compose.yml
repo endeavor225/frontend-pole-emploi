@@ -7,7 +7,7 @@ services:
       context: .
       dockerfile: Dockerfile
       args:
-        - VITE_API_URL=https://api-emploi.pajdef.com/api
+        - VITE_API_URL=https://api-emploi.pajdef.com/api/v1
     image: frontend-pole-emploi:latest
     restart: unless-stopped
     ports:
