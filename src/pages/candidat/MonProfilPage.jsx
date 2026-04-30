@@ -9,7 +9,7 @@ import * as Yup from "yup";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { isValidPhoneNumber } from "react-phone-number-input";
-import { cn } from "@/lib/utils";
+import { API_BASE, cn } from "@/lib/utils";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -93,10 +93,6 @@ const validationSchema = Yup.object().shape({
       return ["pdf", "doc", "docx"].includes(extension);
     }),
 });
-
-const API_BASE = (
-  import.meta.env.VITE_API_URL || "http://localhost:3333/api"
-).replace(/\/api$/, "");
 
 export default function MonProfilPage() {
   const { setUser } = useAuthStore();

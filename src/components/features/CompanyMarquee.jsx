@@ -8,8 +8,8 @@ import CompanyAvatar from "@/components/shared/CompanyAvatar";
 import { Link } from "react-router-dom";
 
 const API_BASE = (
-  import.meta.env.VITE_API_URL || "http://localhost:3333/api"
-).replace(/\/api$/, "");
+  import.meta.env.VITE_API_URL || "http://localhost:3333/api/v1"
+).replace(/\/api\/v1$/, "");
 
 const fadeInUp = {
   hidden: { opacity: 0, y: 40 },

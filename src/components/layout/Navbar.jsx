@@ -28,10 +28,7 @@ import api from "@/api/axios";
 import { AUTH } from "@/api/endpoints";
 import { toast } from "sonner";
 import logoImg from "/logo.png";
-
-const API_BASE = (
-  import.meta.env.VITE_API_URL || "http://localhost:3333/api"
-).replace(/\/api$/, "");
+import { API_BASE } from "@/lib/utils";
 
 export function Navbar() {
   const navigate = useNavigate();

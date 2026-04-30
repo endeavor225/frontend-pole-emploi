@@ -41,11 +41,6 @@ import { toast } from "sonner";
 import { ROLES, TYPE_OFFRE_COLORS } from "@/lib/constants";
 import { timeAgo } from "@/lib/utils";
 
-/* ── Constantes ── */
-const API_BASE = (
-  import.meta.env.VITE_API_URL || "http://localhost:3333/api"
-).replace(/\/api$/, "");
-
 /* ── Badge coloré selon le type d'offre ── */
 function TypeOfreBadge({ type }) {
   const colors = TYPE_OFFRE_COLORS[type] ?? {

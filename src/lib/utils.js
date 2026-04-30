@@ -7,6 +7,11 @@ export function cn(...inputs) {
   return twMerge(clsx(inputs));
 }
 
+// ── URL base pour les assets statiques ──
+export const API_BASE = (
+  import.meta.env.VITE_API_URL || "http://localhost:3333/api/v1"
+).replace(/\/api\/v1$/, "");
+
 /* ── Fonctions utilitaires ────────────────────────────────── */
 export function timeAgo(date) {
   if (!date) return null;

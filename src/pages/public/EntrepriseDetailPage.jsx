@@ -27,11 +27,6 @@ import { toast } from "sonner";
 import { formatExternalUrl } from "@/lib/utils";
 import { ROLES } from "@/lib/constants";
 
-/* ── URL base pour les assets statiques ── */
-const API_BASE = (
-  import.meta.env.VITE_API_URL || "http://localhost:3333/api"
-).replace(/\/api$/, "");
-
 import CompanyAvatar from "@/components/shared/CompanyAvatar";
 /* ── Ligne d'info ── */
 function InfoRow({ icon: Icon, label, value, href }) {

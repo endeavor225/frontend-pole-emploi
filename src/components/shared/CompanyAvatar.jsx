@@ -1,10 +1,6 @@
 import { useState } from "react";
 import { Building2 } from "lucide-react";
-import { cn } from "@/lib/utils";
-
-const API_BASE = (
-  import.meta.env.VITE_API_URL || "http://localhost:3333/api"
-).replace(/\/api$/, "");
+import { API_BASE, cn } from "@/lib/utils";
 
 /**
  * Shared CompanyAvatar component with fallback to initials/icon

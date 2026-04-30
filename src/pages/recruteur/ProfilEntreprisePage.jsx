@@ -25,10 +25,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2, Upload, Save } from "lucide-react";
 import { toast } from "sonner";
 import { AvatarUpload } from "@/components/reui/AvatarUpload";
-
-const API_BASE = (
-  import.meta.env.VITE_API_URL || "http://localhost:3333/api"
-).replace(/\/api$/, "");
+import { API_BASE } from "@/lib/utils";
 
 const validationSchema = Yup.object().shape({
   civilite: Yup.string()
