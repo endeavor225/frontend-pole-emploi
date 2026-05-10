@@ -300,8 +300,8 @@ export default function AboutPage() {
               Prêt à faire partie du changement ?
             </h2>
             <p className="text-xl text-[#696984] mb-12">
-              Que vous soyez candidat(e) à la recherche de votre prochain défi
-              ou recruteur en quête de pépites, PAJDEF est votre allié.
+              Que vous soyez candidat·e à la recherche de votre prochain défi ou
+              recruteur en quête de pépites, PAJDEF est votre allié.
             </p>
             <div className="flex flex-col sm:flex-row justify-center gap-5">
               <Button
