@@ -13,7 +13,7 @@ export function Footer() {
             </div>
             <p className="text-sm">
               Plateforme de mise en relation entre candidats et recruteurs en
-              Côte d'Ivoire — Région de Ferkéssédougou.
+              Côte d'Ivoire — Département de Ferkéssédougou.
             </p>
           </div>
 
