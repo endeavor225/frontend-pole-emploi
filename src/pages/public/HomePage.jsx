@@ -64,7 +64,7 @@ export default function HomePage() {
             },
             {
               title: "Planification Agile",
-              desc: "Gérez vos entretiens et suivez les disponibilités de vos recruteurs Preferred en temps réel.",
+              desc: "Gérez vos entretiens et suivez les disponibilités de vos recruteurs préférés en temps réel.",
               icon: <Calendar className="size-10 text-white" />,
               color: "#F48C06",
             },

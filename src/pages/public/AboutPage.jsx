@@ -118,10 +118,9 @@ export default function AboutPage() {
             </div>
             <h2 className="text-3xl font-bold mb-6">Notre Mission</h2>
             <p className="text-lg text-[#696984] leading-relaxed mb-6">
-              Notre mission est de démocratiser l'accès à l'emploi et à
-              l'apprentissage pour tous les jeunes de Côte d'Ivoire. Nous
-              croyons que chaque talent mérite une chance d'exceller, quels que
-              soient son origine ou son réseau initial.
+              Notre mission est d’accompagner les jeunes dans leur
+              employabilité, leur accès à l’emploi ou à l’auto emploi à travers
+              des stages et des partenariats.
             </p>
             <ul className="space-y-4">
               {[
@@ -153,10 +152,10 @@ export default function AboutPage() {
             </div>
             <h2 className="text-3xl font-bold mb-6">Notre Vision</h2>
             <p className="text-lg text-[#696984] leading-relaxed mb-6">
-              Devenir la plateforme de référence pour l'employabilité des jeunes
-              en Afrique de l'Ouest. Nous aspirons à créer un écosystème
-              dynamique où l'innovation technologique sert le progrès social et
-              économique national.
+              A travers cette plateforme, la PAJDEF ambitionne de devenir un
+              acteur majeur dans la recherche de solutions à l’insertion
+              professionnelle des jeunes du pays (les jeunes du département de
+              Ferké).
             </p>
             <div className="bg-white p-8 rounded-[40px] shadow-2xl border border-border relative overflow-hidden group">
               <div className="absolute top-0 right-0 w-32 h-32 bg-secondary/5 rounded-bl-full transition-transform group-hover:scale-150 duration-700" />
@@ -245,9 +244,9 @@ export default function AboutPage() {
             </h2>
             <p className="text-xl opacity-90 leading-relaxed mb-8">
               Notre équipe est composée de passionnés de technologie, d'experts
-              en ressources humaines et de visionnaires engagés pour la Côte
-              d'Ivoire. Ensemble, nous construisons plus qu'une plateforme :
-              nous bâtissons l'avenir.
+              en ressources humaines et de visionnaires engagés pour le
+              Département de FERKE. Ensemble, nous construisons plus qu'une
+              plateforme : nous bâtissons l'avenir.
             </p>
             <div className="flex items-center gap-4">
               <div className="flex -space-x-3">
@@ -301,8 +300,8 @@ export default function AboutPage() {
               Prêt à faire partie du changement ?
             </h2>
             <p className="text-xl text-[#696984] mb-12">
-              Que vous soyez candidat à la recherche de votre prochain défi ou
-              recruteur en quête de pépites, PAJDEF est votre allié.
+              Que vous soyez candidat(e) à la recherche de votre prochain défi
+              ou recruteur en quête de pépites, PAJDEF est votre allié.
             </p>
             <div className="flex flex-col sm:flex-row justify-center gap-5">
               <Button
