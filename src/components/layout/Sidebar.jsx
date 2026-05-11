@@ -11,6 +11,7 @@ import {
   PlusCircle,
   Building2,
   Pencil,
+  MessageSquare,
 } from "lucide-react";
 import { useAuthStore } from "@/store/authStore";
 import { API_BASE, cn } from "@/lib/utils";
@@ -19,6 +20,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import api from "@/api/axios";
 import { AUTH } from "@/api/endpoints";
 import { toast } from "sonner";
+import { useConversations } from "@/hooks/useMessages";
 
 /* ── Liens candidat ── */
 const candidatLinks = [
@@ -31,6 +33,7 @@ const candidatLinks = [
   { to: "/candidat/profil", icon: User, label: "Page Personnelle" },
   { to: "/candidat/candidatures", icon: FileText, label: "Mes candidatures" },
   { to: "/candidat/favoris", icon: Heart, label: "Mes favoris" },
+  { to: "/messages", icon: MessageSquare, label: "Mes messages" },
   { to: "/settings", icon: Settings, label: "Mes paramètres" },
 ];
 
@@ -49,12 +52,14 @@ const recruteurLinks = [
     icon: PlusCircle,
     label: "Nouvelle offre",
   },
+  { to: "/messages", icon: MessageSquare, label: "Mes messages" },
   { to: "/settings", icon: Settings, label: "Mes paramètres" },
 ];
 
 export function Sidebar() {
   const navigate = useNavigate();
   const { user, logout: clearAuth } = useAuthStore();
+  const { unreadCount } = useConversations();
 
   const isCandidat = user?.role === ROLES.CANDIDAT;
   const isRecruteur = user?.role === ROLES.RECRUTEUR;
@@ -152,7 +157,7 @@ export function Sidebar() {
             <div className="text-xs text-muted-foreground space-y-0.5 mt-1">
               {experienceMin != null && (
                 <p>
-                  Années d&apos;expériences :{" "}
+                  Années d'expériences :{" "}
                   <span className="text-primary font-semibold">
                     {experienceMin} an{experienceMin > 1 ? "s" : ""}
                   </span>
@@ -160,7 +165,7 @@ export function Sidebar() {
               )}
               {niveauEtude && (
                 <p>
-                  Niveau d&apos;études :{" "}
+                  Niveau d'études :{" "}
                   <span className="text-primary font-semibold">
                     {niveauEtude}
                   </span>
@@ -190,7 +195,12 @@ export function Sidebar() {
               }
             >
               <Icon className="w-4 h-4 shrink-0" />
-              {label}
+              <span className="flex-1">{label}</span>
+              {to === "/messages" && unreadCount > 0 && (
+                <span className="bg-primary-foreground text-primary rounded-full px-2 py-0.5 text-[10px] font-bold">
+                  {unreadCount}
+                </span>
+              )}
             </NavLink>
           ))}
 
