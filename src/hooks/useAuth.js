@@ -14,7 +14,7 @@ export function useAuth() {
       try {
         const { data } = await api.post(AUTH.LOGIN, { email, password });
         setAuth(data.user, data.token.token, data.refreshToken.token);
-        toast.success("Connexion réussie !");
+        //toast.success("Connexion réussie !");
 
         // Redirection
         if (redirectPath) {
@@ -77,7 +77,7 @@ export function useAuth() {
       throw new Error("Erreur lors de la déconnexion");
     } finally {
       clearAuth();
-      toast.success("Déconnexion réussie");
+      //toast.success("Déconnexion réussie");
     }
   }, [clearAuth]);
 
