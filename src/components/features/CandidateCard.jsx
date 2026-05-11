@@ -49,7 +49,7 @@ export default function CandidateCard({
   const [pendingStatus, setPendingStatus] = useState(null);
 
   const c = candidature;
-  const candidat = c.candidat || c.user || {};
+  const candidat = c.candidat || {};
 
   const handleStatusSelect = (v) => {
     setPendingStatus(v);
@@ -216,7 +216,7 @@ export default function CandidateCard({
               asChild
             >
               <Link
-                to={`/messages/${candidat.id || candidat.userId}`}
+                to={`/messages/${candidat.userId}`}
                 className="flex items-center gap-2"
               >
                 <MessageSquare className="h-4 w-4" /> Message
