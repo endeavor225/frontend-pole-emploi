@@ -45,6 +45,9 @@ const MesCandidatures = lazy(
 );
 const MesFavoris = lazy(() => import("@/pages/candidat/MesFavorisPage"));
 const MonProfil = lazy(() => import("@/pages/candidat/MonProfilPage"));
+const OffresRecommandees = lazy(
+  () => import("@/pages/candidat/OffresRecommandeesPage"),
+);
 
 // Recruteur
 const RecruteurDashboard = lazy(
@@ -245,6 +248,16 @@ export const router = createBrowserRouter([
           <RoleRoute roles={[ROLES.CANDIDAT]}>
             <Lazy>
               <MesFavoris />
+            </Lazy>
+          </RoleRoute>
+        ),
+      },
+      {
+        path: "/candidat/recommandations",
+        element: (
+          <RoleRoute roles={[ROLES.CANDIDAT]}>
+            <Lazy>
+              <OffresRecommandees />
             </Lazy>
           </RoleRoute>
         ),

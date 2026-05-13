@@ -75,11 +75,7 @@ export default function OffresPage() {
   const user = useAuthStore((s) => s.user);
   const [selectedDomaines, setSelectedDomaines] = useState(() => {
     const raw = searchParams.get("domaine_id");
-    if (raw) return raw.split(",").filter(Boolean);
-    /* Pré-cochage silencieux du domaine candidat */
-    const domaineId =
-      user?.candidat?.domaineId ?? user?.candidat?.domaine?.id ?? null;
-    return domaineId ? [domaineId] : [];
+    return raw ? raw.split(",").filter(Boolean) : [];
   });
 
   const [salRange, setSalRange] = useState(() => {

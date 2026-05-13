@@ -8,7 +8,8 @@ import { OFFRES } from "@/api/endpoints";
  */
 export function useOffres(filters = {}) {
   const params = new URLSearchParams();
-  Object.entries(filters).forEach(([key, value]) => {
+  const actualFilters = filters || {};
+  Object.entries(actualFilters).forEach(([key, value]) => {
     if (value !== undefined && value !== "" && value !== null) {
       params.set(key, value);
     }
