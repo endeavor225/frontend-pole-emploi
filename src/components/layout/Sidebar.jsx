@@ -11,6 +11,8 @@ import {
   PlusCircle,
   Building2,
   Pencil,
+  MessageSquare,
+  Sparkles,
 } from "lucide-react";
 import { useAuthStore } from "@/store/authStore";
 import { API_BASE, cn } from "@/lib/utils";
@@ -19,20 +21,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import api from "@/api/axios";
 import { AUTH } from "@/api/endpoints";
 import { toast } from "sonner";
-
-/* ── Liens candidat ── */
-const candidatLinks = [
-  {
-    to: "/candidat/dashboard",
-    icon: Home,
-    label: "Espace candidat",
-    end: true,
-  },
-  { to: "/candidat/profil", icon: User, label: "Page Personnelle" },
-  { to: "/candidat/candidatures", icon: FileText, label: "Mes candidatures" },
-  { to: "/candidat/favoris", icon: Heart, label: "Mes favoris" },
-  { to: "/settings", icon: Settings, label: "Mes paramètres" },
-];
+import { useConversations } from "@/hooks/useMessages";
+import { useOffres } from "@/hooks/useOffres";
 
 /* ── Liens recruteur ── */
 const recruteurLinks = [
@@ -49,15 +39,43 @@ const recruteurLinks = [
     icon: PlusCircle,
     label: "Nouvelle offre",
   },
+  { to: "/messages", icon: MessageSquare, label: "Mes messages" },
   { to: "/settings", icon: Settings, label: "Mes paramètres" },
 ];
 
 export function Sidebar() {
   const navigate = useNavigate();
   const { user, logout: clearAuth } = useAuthStore();
+  const { unreadCount } = useConversations();
 
   const isCandidat = user?.role === ROLES.CANDIDAT;
   const isRecruteur = user?.role === ROLES.RECRUTEUR;
+
+  const domaineId = user?.candidat?.domaineId ?? user?.candidat?.domaine?.id;
+  const { meta: recoMeta } = useOffres(
+    isCandidat && domaineId ? { domaine_id: domaineId, limit: 1 } : null,
+  );
+  const recoCount = recoMeta?.total || 0;
+
+  /* ── Liens candidat ── */
+  const candidatLinks = [
+    {
+      to: "/candidat/dashboard",
+      icon: Home,
+      label: "Espace candidat",
+      end: true,
+    },
+    { to: "/candidat/profil", icon: User, label: "Page Personnelle" },
+    {
+      to: "/candidat/recommandations",
+      icon: Sparkles,
+      label: "Offres pour vous",
+    },
+    { to: "/candidat/candidatures", icon: FileText, label: "Mes candidatures" },
+    { to: "/candidat/favoris", icon: Heart, label: "Mes favoris" },
+    { to: "/messages", icon: MessageSquare, label: "Mes messages" },
+    { to: "/settings", icon: Settings, label: "Mes paramètres" },
+  ];
 
   const links = isRecruteur ? recruteurLinks : candidatLinks;
 
@@ -152,7 +170,7 @@ export function Sidebar() {
             <div className="text-xs text-muted-foreground space-y-0.5 mt-1">
               {experienceMin != null && (
                 <p>
-                  Années d&apos;expériences :{" "}
+                  Années d'expériences :{" "}
                   <span className="text-primary font-semibold">
                     {experienceMin} an{experienceMin > 1 ? "s" : ""}
                   </span>
@@ -160,7 +178,7 @@ export function Sidebar() {
               )}
               {niveauEtude && (
                 <p>
-                  Niveau d&apos;études :{" "}
+                  Niveau d'études :{" "}
                   <span className="text-primary font-semibold">
                     {niveauEtude}
                   </span>
@@ -190,7 +208,17 @@ export function Sidebar() {
               }
             >
               <Icon className="w-4 h-4 shrink-0" />
-              {label}
+              <span className="flex-1">{label}</span>
+              {to === "/messages" && unreadCount > 0 && (
+                <span className="bg-primary-foreground text-destructive rounded-full px-2 py-0.5 text-[12px]">
+                  {unreadCount}
+                </span>
+              )}
+              {to === "/candidat/recommandations" && recoCount > 0 && (
+                <span className="bg-primary-foreground text-destructive rounded-full px-2 py-0.5 text-[12px] ">
+                  {recoCount}
+                </span>
+              )}
             </NavLink>
           ))}
 

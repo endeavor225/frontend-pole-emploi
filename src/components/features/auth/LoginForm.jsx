@@ -54,7 +54,11 @@ export function LoginForm() {
         await login(values.email, values.password, from);
       } catch (error) {
         // API Error handled globally by useAuth hooks
-        setStatus(error.response?.data?.message || "Identifiants incorrects");
+        setStatus(
+          error.response?.data?.message ||
+            error.message ||
+            "Identifiants incorrects",
+        );
       } finally {
         setSubmitting(false);
       }

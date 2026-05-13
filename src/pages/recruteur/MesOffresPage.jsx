@@ -54,7 +54,6 @@ function StatCard({ title, value, icon: Icon, colorClass }) {
 
 export default function MesOffresPage() {
   const { offres, isLoading, mutate } = useOffres({ candidatures: true });
-  console.log("🚀 ~ MesOffresPage ~ offres:", JSON.stringify(offres, null, 2));
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [deleting, setDeleting] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
