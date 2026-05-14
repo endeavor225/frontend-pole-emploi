@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useMemo } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import {
   useMessages,
   sendMessage,
@@ -9,11 +9,12 @@ import { useAuthStore } from "@/store/authStore";
 import { LoadingSpinner } from "@/components/shared/LoadingSpinner";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ArrowLeft, Send, Loader2 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn, API_BASE } from "@/lib/utils";
 import { toast } from "sonner";
+import CompanyAvatar from "@/components/shared/CompanyAvatar";
 
 /**
  * Retourne un label de date en français :
@@ -80,8 +81,35 @@ function groupMessagesByDate(messages) {
 export default function ConversationPage() {
   const { userId } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const currentUser = useAuthStore((s) => s.user);
   const { messages, isLoading, mutate } = useMessages(userId);
+
+  // Fallback info from navigation state
+  const otherFromState = location.state?.otherUser;
+
+  // Identify the other user for the header
+  const otherUser = useMemo(() => {
+    let user = null;
+    if (messages.length > 0) {
+      const first = messages[0];
+      user = first.senderId === currentUser?.id ? first.receiver : first.sender;
+    }
+
+    // Fusionner les données du state avec celles des messages pour avoir le max d'infos
+    // (Le state a souvent les infos d'entreprise/photo, les messages ont l'ID et les noms)
+    if (otherFromState) {
+      return {
+        ...user,
+        ...otherFromState,
+        // On garde les objets imbriqués s'ils existent dans l'un ou l'autre
+        entreprise: otherFromState.entreprise || user?.entreprise,
+        candidat: otherFromState.candidat || user?.candidat,
+      };
+    }
+
+    return user;
+  }, [messages, currentUser?.id, otherFromState]);
   const [text, setText] = useState("");
   const [sending, setSending] = useState(false);
   const scrollRef = useRef(null);
@@ -127,38 +155,65 @@ export default function ConversationPage() {
     <div className="flex flex-col h-[calc(100vh-8rem)] -mb-20">
       {/* Header */}
       <div className="flex items-center gap-3 border-b pb-4 mb-4">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => navigate("/messages")}
-        >
+        <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
           <ArrowLeft className="h-4 w-4" />
         </Button>
-        <Avatar className="h-8 w-8">
-          <AvatarFallback className="bg-primary/10 text-primary text-xs font-semibold">
-            {(() => {
-              const first = messages[0];
-              if (!first) return "?";
-              const other =
-                first.senderId === currentUser?.id
-                  ? first.receiver
-                  : first.sender;
-              return other
-                ? `${(other.prenom || "")[0]}${(other.nom || "")[0]}`.toUpperCase()
-                : "?";
-            })()}
-          </AvatarFallback>
-        </Avatar>
+        {(() => {
+          const companyName = otherUser?.entreprise?.nomEntreprise;
+          const logo = otherUser?.entreprise?.logoPath;
+          const photo = otherUser?.candidat?.photoPath;
+
+          if (otherUser?.role === "RECRUTEUR" || !!companyName) {
+            return (
+              <CompanyAvatar
+                name={companyName || "Entreprise"}
+                logoPath={logo}
+                size={32}
+                className="rounded-full"
+                objectCover
+              />
+            );
+          }
+
+          return (
+            <Avatar className="h-8 w-8">
+              {photo && (
+                <AvatarImage
+                  src={`${API_BASE}${photo}`}
+                  alt={`${otherUser?.prenom} ${otherUser?.nom}`}
+                  className="object-cover"
+                />
+              )}
+              <AvatarFallback className="bg-primary/10 text-primary text-xs font-semibold">
+                {(() => {
+                  if (!otherUser) return "?";
+                  if (otherUser.prenom && otherUser.nom) {
+                    return `${otherUser.prenom[0]}${otherUser.nom[0]}`.toUpperCase();
+                  }
+                  return (otherUser.nom || otherUser.prenom || "?")[0].toUpperCase();
+                })()}
+              </AvatarFallback>
+            </Avatar>
+          );
+        })()}
         <div>
           <p className="font-medium text-sm">
             {(() => {
-              const first = messages[0];
-              if (!first) return "Conversation";
-              const other =
-                first.senderId === currentUser?.id
-                  ? first.receiver
-                  : first.sender;
-              return other ? `${other.prenom} ${other.nom}` : "Conversation";
+              if (!otherUser) return "Conversation";
+
+              const companyName = otherUser.entreprise?.nomEntreprise;
+
+              // Priorité absolue au nom de l'entreprise pour les recruteurs
+              if (otherUser.role === "RECRUTEUR" || companyName) {
+                return companyName || "Entreprise";
+              }
+
+              // Sinon, prénom + nom pour les candidats
+              if (otherUser.prenom && otherUser.nom) {
+                return `${otherUser.prenom} ${otherUser.nom}`;
+              }
+
+              return otherUser.nom || otherUser.prenom || "Conversation";
             })()}
           </p>
         </div>
