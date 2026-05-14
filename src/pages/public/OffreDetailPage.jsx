@@ -467,7 +467,10 @@ export default function OffreDetailPage() {
 
                 {isAuthenticated && entreprise.userId && (
                   <Button variant="outline" className="w-full gap-2" asChild>
-                    <Link to={`/messages/${entreprise.userId}`}>
+                    <Link
+                      to={`/messages/${entreprise.userId}`}
+                      state={{ otherUser: { ...(entreprise.user || {}), ...entreprise } }}
+                    >
                       <MessageSquare className="w-4 h-4" /> Contacter le
                       recruteur
                     </Link>

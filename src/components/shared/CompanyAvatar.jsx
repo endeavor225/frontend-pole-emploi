@@ -14,6 +14,7 @@ export default function CompanyAvatar({
   logoPath = null,
   size,
   className,
+  objectCover = false,
 }) {
   const [imgError, setImgError] = useState(false);
 
@@ -49,7 +50,10 @@ export default function CompanyAvatar({
         <img
           src={logoUrl}
           alt={name}
-          className="w-full h-full object-contain p-1"
+          className={cn(
+            "w-full h-full",
+            objectCover ? "object-cover" : "object-contain p-1",
+          )}
           onError={() => setImgError(true)}
         />
       </div>
