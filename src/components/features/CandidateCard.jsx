@@ -217,6 +217,7 @@ export default function CandidateCard({
             >
               <Link
                 to={`/messages/${candidat.userId}`}
+                state={{ otherUser: { ...(candidat.user || {}), ...candidat } }}
                 className="flex items-center gap-2"
               >
                 <MessageSquare className="h-4 w-4" /> Message
