@@ -46,7 +46,7 @@ export function Navbar() {
       // Logout même si l'API échoue
     } finally {
       clearAuth();
-      toast.success("Déconnexion réussie");
+      //toast.success("Déconnexion réussie");
     }
   };
 
