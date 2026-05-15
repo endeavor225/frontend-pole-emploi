@@ -132,11 +132,10 @@ export default function CandidaturesOffrePage() {
           <Button
             variant="ghost"
             size="sm"
-            className="group -ml-3 hover:bg-primary/5 text-muted-foreground hover:text-primary transition-all rounded-xl"
+            className="mb-5"
             onClick={() => navigate(-1)}
           >
-            <ArrowLeft className="mr-2 h-4 w-4 transition-transform group-hover:-translate-x-1" />
-            Retour au catalogue
+            <ArrowLeft className="mr-2 h-4 w-4" /> Retour au catalogue
           </Button>
           <div className="flex items-center gap-2">
             <h1 className="text-3xl font-extrabold tracking-tight text-foreground">
