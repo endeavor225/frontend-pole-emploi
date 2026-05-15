@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { Link } from "react-router-dom";
-import { useOffres, deleteOffre } from "@/hooks/useOffres";
+import { useOffres, deleteOffre, updateOffre } from "@/hooks/useOffres";
 import { LoadingSpinner } from "@/components/shared/LoadingSpinner";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { Button } from "@/components/ui/button";
@@ -68,10 +68,12 @@ export default function MesOffresPage() {
         acc + (curr.candidatures?.length || curr.candidaturesCount || 0),
       0,
     );
-    // On considère "active" si pas de date limite ou date limite > aujourd'hui
     const actives = offres.filter((o) => {
-      if (!o.dateLimite) return true;
-      return new Date(o.dateLimite) > new Date();
+      const isExpired =
+        o.dateLimite &&
+        new Date(o.dateLimite).setHours(0, 0, 0, 0) <
+          new Date().setHours(0, 0, 0, 0);
+      return o.statut === "active" && !isExpired;
     }).length;
 
     return { total, totalCandidatures, actives };
@@ -98,6 +100,19 @@ export default function MesOffresPage() {
     } finally {
       setDeleting(false);
       setDeleteTarget(null);
+    }
+  };
+
+  const handleUpdateStatus = async (offre, newStatus) => {
+    const payload = { ...offre, statut: newStatus };
+    try {
+      await updateOffre(offre.id, payload);
+      toast.success(`Statut mis à jour : ${newStatus}`);
+      mutate();
+    } catch (error) {
+      toast.error(
+        error.response?.data?.message || "Erreur lors de la mise à jour",
+      );
     }
   };
 
@@ -181,6 +196,7 @@ export default function MesOffresPage() {
               key={offre.id}
               offre={offre}
               onDelete={setDeleteTarget}
+              onStatusChange={handleUpdateStatus}
             />
           ))}
         </div>
