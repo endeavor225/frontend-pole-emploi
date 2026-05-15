@@ -65,7 +65,7 @@ export function Sidebar() {
       label: "Espace candidat",
       end: true,
     },
-    { to: "/candidat/profil", icon: User, label: "Page Personnelle" },
+    { to: "/candidat/profil", icon: User, label: "Mon profil" },
     {
       to: "/candidat/recommandations",
       icon: Sparkles,
@@ -118,7 +118,7 @@ export function Sidebar() {
       /* ignore */
     } finally {
       clearAuth();
-      toast.success("Déconnexion réussie");
+      //toast.success("Déconnexion réussie");
       navigate("/login");
     }
   };

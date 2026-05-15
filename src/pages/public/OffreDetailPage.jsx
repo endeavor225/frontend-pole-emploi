@@ -191,7 +191,8 @@ export default function OffreDetailPage() {
       })
     : null;
   const isExpired = offre.dateLimite
-    ? new Date(offre.dateLimite) < new Date()
+    ? new Date(offre.dateLimite).setHours(0, 0, 0, 0) <
+      new Date().setHours(0, 0, 0, 0)
     : false;
 
   return (

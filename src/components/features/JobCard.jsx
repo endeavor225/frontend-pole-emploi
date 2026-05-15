@@ -57,7 +57,10 @@ export default function JobCard({ offre, isFavori, onToggleFavori }) {
         year: "numeric",
       })
     : null;
-  const isExpired = offre.dateLimite && new Date(offre.dateLimite) < new Date();
+  const isExpired =
+    offre.dateLimite &&
+    new Date(offre.dateLimite).setHours(0, 0, 0, 0) <
+      new Date().setHours(0, 0, 0, 0);
 
   /* Niveaux d'étude */
   const niveaux = offre.niveauxEtude ?? [];
